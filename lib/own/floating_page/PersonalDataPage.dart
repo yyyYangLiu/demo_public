@@ -68,6 +68,8 @@ class PersonalDataPageState extends State<PersonalDataPage> {
         day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
         templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
       );
+
+      Navigator.of(context).pop();
   }
 
   @override

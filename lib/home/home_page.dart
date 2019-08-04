@@ -3,7 +3,7 @@
 import 'package:demo/CustomItem/FancyFab.dart';
 import 'package:demo/data/data_page.dart';
 import 'package:demo/data/floating_page/addOrsearchPage.dart';
-import 'package:demo/own/floating_page/FirstPage.dart';
+
 import 'package:demo/own/own_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,21 +43,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
           alignment: Alignment.bottomRight,
           child: Padding(
             padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 70.0),
-            child: FloatingActionButton(
-              onPressed: (){
-                Navigator.of(context).push(CupertinoPageRoute(
-
-                    builder: (BuildContext context){
-                      print(_tabController.index);
-                      if (_tabController.index == 0){
-                        return AddOrSearchPage();
-                      }
-                      return FirstPage();
-                    }
-                ));
-              },
-              child: Icon(Icons.add,size:40.0,color: Colors.black,),
-              backgroundColor: Colors.white,
+            child: FancyFab(
+              tabController: _tabController,
             ),
           ),),
           Align(

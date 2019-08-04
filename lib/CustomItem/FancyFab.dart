@@ -1,8 +1,16 @@
 
 
+import 'package:demo/own/floating_page/PersonalDataPage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FancyFab extends StatefulWidget{
+  final Function() onPressed;
+  final TabController tabController;
+  final String tooltip;
+  final IconData icon;
+
+  FancyFab({this.onPressed,this.tooltip,this.icon, this.tabController});
 
   @override
   _FancyFabState createState() => _FancyFabState();
@@ -14,7 +22,11 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
   AnimationController _animationController;
   Animation<Color> _animateColor;
   Animation<double> _animateIcon;
+  Animation<double> _translateButton;
   Curve _curve = Curves.easeOut;
+  double _febHeight = 56.0;
+
+  TextEditingController enterController = new TextEditingController();
 
   @override
   void initState() {
@@ -31,8 +43,19 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
       curve: Interval(
         0.00,
         1.00,
-        curve: _curve
+        curve: Curves.linear
       ),
+    ));
+    _translateButton = Tween<double>(
+      begin: _febHeight,
+      end: -14.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Interval(
+        0.0,
+        0.75,
+        curve: _curve
+      )
     ));
     super.initState();
   }
@@ -52,20 +75,126 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     isOpened = !isOpened;
   }
 
-  Widget toggle(){
-    return FloatingActionButton(
-      backgroundColor: _animateColor.value,
-      onPressed: animate,
-      tooltip: 'Toggle',
-      child: AnimatedIcon(
-        icon: AnimatedIcons.menu_close,
-          progress: _animateIcon,
+  _showDialog() async {
+    await showDialog<String>(
+        context: context,
+        child: new AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0)
+          ),
+          contentPadding: const EdgeInsets.all(16.0),
+          content: Container(
+            height: 130,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Flexible(
+                  child: new TextField(
+                    controller: enterController,
+                    autocorrect: true,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Name : ",
+                        hintText: 'Create a name'),
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+                Flexible(
+                  child: RawMaterialButton(
+                    fillColor: Colors.blue,
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(CupertinoPageRoute(
+                          builder: (BuildContext context){
+                            return PersonalDataPage(enterController.text);
+                          }
+                      ));
+                    },
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Create",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15.0),),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        )
+    );
+  }
+
+  Widget add(index){
+    return new Container(
+      child: FloatingActionButton(
+        heroTag: "add",
+        onPressed: (){
+          if (index == 1){
+            _showDialog();
+          }else{
+
+          }
+        },
+        tooltip: 'Add',
+        child: Icon(Icons.add),
       )
+    );
+  }
+
+  Widget inbox(){
+    return new Container(
+      child: FloatingActionButton(
+        heroTag: "inbox",
+        onPressed: widget.onPressed,
+        tooltip: 'Inbox',
+        child: Icon(Icons.inbox),
+      ),
+    );
+  }
+
+  Widget toggle(){
+    return Container(
+      child: FloatingActionButton(
+        heroTag: "toggle",
+        backgroundColor: _animateColor.value,
+        onPressed: animate,
+        tooltip: 'Toggle',
+        child: AnimatedIcon(
+          icon: AnimatedIcons.menu_close,
+            progress: _animateIcon,
+        )
+      ),
     );
   }
   @override
   Widget build(BuildContext context) {
+    if (widget.tabController.index == 0){
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Transform(
+              transform: Matrix4.translationValues(0.0, _translateButton.value, 0.0),
+              child: add(widget.tabController.index)),
+          toggle()
+        ],
+      );
 
-    return toggle();
+    }else{
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Transform(
+              transform: Matrix4.translationValues(0.0, _translateButton.value * 2.0, 0.0),
+              child: inbox()),
+          Transform(
+              transform: Matrix4.translationValues(0.0, _translateButton.value , 0.0),
+              child: add(widget.tabController.index)),
+          toggle()
+        ],
+      );
+    }
   }
 }
