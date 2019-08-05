@@ -1,3 +1,4 @@
+import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
 import 'package:demo/own/floating_page/widget/CreateTemplate.dart';
@@ -9,13 +10,15 @@ import 'package:flutter/material.dart';
 
 class PersonalDataPage extends StatefulWidget{
   String name;
-  PersonalDataPage(this.name);
+  Function updateMainPage;
+  PersonalDataPage({this.name,this.updateMainPage});
 
   @override
   PersonalDataPageState createState() => PersonalDataPageState();
 }
 
 class PersonalDataPageState extends State<PersonalDataPage> {
+  final dbHelper = DatabaseHelper.instance;
   final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
   List<TemplateItem> templates = [];
@@ -32,11 +35,10 @@ class PersonalDataPageState extends State<PersonalDataPage> {
     super.initState();
   }
 
-
   int day = 0;
   int counts = 0;
 
-  _saveToDataBase(){
+  _saveToDataBase() async {
       // name
       print(widget.name);
       // type
@@ -69,6 +71,22 @@ class PersonalDataPageState extends State<PersonalDataPage> {
         templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
       );
 
+      Map<String, dynamic> row = {
+        DatabaseHelper.columnName : widget.name
+      };
+
+      final id = await dbHelper.insert(row);
+      print('inserted row id: $id');
+
+      final allRows = await dbHelper.queryAllRows();
+      print('query all rows:');
+      allRows.forEach((row) => print(row));
+
+      List<String> locallist = [];
+      final check = await dbHelper.getData(widget.name);
+      check.forEach((row) => locallist.add(row.toString()));
+
+      widget.updateMainPage(locallist);
       Navigator.of(context).pop();
   }
 

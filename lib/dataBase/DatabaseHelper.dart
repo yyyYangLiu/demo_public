@@ -16,7 +16,6 @@ class DatabaseHelper{
 
   static final columnId = '_id';
   static final columnName = 'name';
-  static final columnAge = 'age';
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -41,8 +40,7 @@ class DatabaseHelper{
     await db.execute('''
       CREATE TABLE $table (
         $columnId INTEGER PRIMARY KEY,
-        $columnName TEXT NOT NULL,
-        $columnAge INTEGER NOT NULL
+        $columnName TEXT NOT NULL
       )
     ''');
   }
@@ -55,6 +53,11 @@ class DatabaseHelper{
   Future<List<Map<String, dynamic>>> queryAllRows() async {
     Database db = await instance.database;
     return await db.query(table);
+  }
+
+  Future<List<Map<String, dynamic>>> getData(String name) async {
+    Database db = await instance.database;
+    return await db.query(table, where: "name = ?",whereArgs: [name]);
   }
 
   Future<int> queryRowCount() async{
@@ -71,6 +74,11 @@ class DatabaseHelper{
   Future<int> delete(int id) async{
     Database db = await instance.database;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  deleteAll() async {
+    Database db =await instance.database;
+    db.rawDelete("DELETE FROM $table");
   }
 
 }

@@ -1,26 +1,44 @@
 
 
+import 'package:demo/dataBase/DatabaseHelper.dart';
+import 'package:demo/home/home_page.dart';
 import 'package:demo/own/owndatalist/owndatalist.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 
 class OwnPage extends StatefulWidget{
+  GlobalKey<OwnPageState> key;
+  OwnPage({this.key});
 
   @override
-  _OwnPageState createState() => _OwnPageState();
+  OwnPageState createState() => OwnPageState();
 }
 
-class _OwnPageState extends State<OwnPage> {
+class OwnPageState extends State<OwnPage> {
+
+  GlobalKey<OwnDataListState> childkey = GlobalKey();
+
+  void updateList(List<String> list){
+    print("get in first key");
+    childkey.currentState.updateList(list);
+  }
+
+  void deleteAll(){
+    childkey.currentState.deleteAll();
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: SafeArea(
           child: CustomScrollView(
             physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              OwnDataList()
+              OwnDataList(
+                key: childkey,
+              )
             ],
           )),
 

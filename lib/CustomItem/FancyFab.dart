@@ -5,12 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FancyFab extends StatefulWidget{
-  final Function() onPressed;
+  final Function onPressed;
+  final Function onDelete;
   final TabController tabController;
   final String tooltip;
   final IconData icon;
 
-  FancyFab({this.onPressed,this.tooltip,this.icon, this.tabController});
+  FancyFab({this.onPressed,this.onDelete,this.tooltip,this.icon, this.tabController});
 
   @override
   _FancyFabState createState() => _FancyFabState();
@@ -106,7 +107,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
                       Navigator.of(context).pop();
                       Navigator.of(context).push(CupertinoPageRoute(
                           builder: (BuildContext context){
-                            return PersonalDataPage(enterController.text);
+                            return PersonalDataPage(name: enterController.text, updateMainPage: widget.onPressed,);
                           }
                       ));
                     },
@@ -148,7 +149,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     return new Container(
       child: FloatingActionButton(
         heroTag: "inbox",
-        onPressed: widget.onPressed,
+        onPressed: widget.onDelete,
         tooltip: 'Inbox',
         child: Icon(Icons.inbox),
       ),

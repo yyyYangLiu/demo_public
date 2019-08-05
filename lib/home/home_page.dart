@@ -1,12 +1,12 @@
-
-
 import 'package:demo/CustomItem/FancyFab.dart';
 import 'package:demo/data/data_page.dart';
-import 'package:demo/data/floating_page/addOrsearchPage.dart';
 
 import 'package:demo/own/own_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+
+import 'package:demo/dataBase/DatabaseHelper.dart';
 
 class Home extends StatefulWidget{
   @override
@@ -15,11 +15,25 @@ class Home extends StatefulWidget{
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
   TabController _tabController;
+  final dbHelper = DatabaseHelper.instance;
+  GlobalKey<OwnPageState> _keyOwnPage = GlobalKey();
+
 
   @override
   void initState() {
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
+  }
+
+
+  deleteAll() async {
+    await dbHelper.deleteAll();
+    _keyOwnPage.currentState.deleteAll();
+  }
+
+  updateData(updatelist) async {
+      print("get into zero");
+      _keyOwnPage.currentState.updateList(updatelist);
   }
 
   @override
@@ -36,7 +50,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
             physics: BouncingScrollPhysics(),
             children: <Widget>[
               DataPage(),
-              OwnPage()
+              OwnPage(
+                key: _keyOwnPage,
+              )
             ],
           ),
           Align(
@@ -45,6 +61,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
             padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 70.0),
             child: FancyFab(
               tabController: _tabController,
+              onPressed: updateData,
+              onDelete: deleteAll,
             ),
           ),),
           Align(

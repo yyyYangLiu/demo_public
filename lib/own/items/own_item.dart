@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class OwnDataItem extends StatelessWidget{
+  String name;
+  OwnDataItem({this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class OwnDataItem extends StatelessWidget{
             color: Colors.red,
             width: 1000,
             height: 150,
+            child: Text(name),
           ),
         ),
       ),
