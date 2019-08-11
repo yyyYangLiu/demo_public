@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
@@ -6,6 +8,7 @@ import 'package:demo/own/floating_page/widget/NewCustomDayTemplateSelector.dart'
 import 'package:demo/own/floating_page/widget/TypeBar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 
 class PersonalDataPage extends StatefulWidget{
@@ -62,15 +65,18 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       //check tempaltes
       List<TemplateModel> templatemodel = filtertemplates.map((item) => TemplateModel(index: item.index, time: list[item.index].map((item) => item.time).toList())).toList();
 
+      OwnDataModel owndatatest =
+
       OwnDataModel(
         name: widget.name,
         type: selectType,
         answer: fliteranswers.map((item) => item.text).toList(),
-        template: [],
+        template: templatemodel,
         day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
         templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
       );
-
+      final String inputJson = clientToJson(owndatatest);
+      print(clientToJson(owndatatest));
       Map<String, dynamic> row = {
         DatabaseHelper.columnName : widget.name
       };
@@ -82,12 +88,30 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       print('query all rows:');
       allRows.forEach((row) => print(row));
 
-      List<String> locallist = [];
+      List<OwnDataDataBase> outputlist = [];
       final check = await dbHelper.getData(widget.name);
-      check.forEach((row) => locallist.add(row.toString()));
+      outputlist.add(OwnDataDataBase(id: check[0]["id"], name: check[0]["name"]));
 
-      widget.updateMainPage(locallist);
+      widget.updateMainPage(outputlist);
+      _createFile(inputJson);
+      _readFile();
       Navigator.of(context).pop();
+  }
+
+  _createFile(inputJson) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path;
+    print(path);
+    final file = await File('$path/${widget.name}.txt');
+    file.writeAsStringSync(inputJson);
+  }
+
+  _readFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path;
+    final file = await File('$path/${widget.name}.txt');
+    String contents = await file.readAsString();
+    print(contents);
   }
 
   @override

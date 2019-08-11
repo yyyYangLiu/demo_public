@@ -12,8 +12,7 @@ class CreateAnswer extends StatefulWidget{
   _CreateAnswerState createState() => _CreateAnswerState();
 }
 
-class _CreateAnswerState extends State<CreateAnswer> {
-
+class _CreateAnswerState extends State<CreateAnswer>{
 
   int index = 0;
 
@@ -94,9 +93,30 @@ class Answer extends StatefulWidget{
   _AnswerState createState() => _AnswerState();
 }
 
-class _AnswerState extends State<Answer> {
+class _AnswerState extends State<Answer> with SingleTickerProviderStateMixin{
+
+  AnimationController _animationController;
+  Animation<double> _translateButton;
   bool isA = true;
   bool isV = true;
+
+  void initState (){
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds:  150))
+      ..addListener((){
+        setState(() {});
+      });
+    _translateButton = Tween<double>(
+      begin: 0.0,
+      end: -30.0,
+    ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          0.0,
+          0.75,
+        )
+    ));
+    super.initState();
+  }
 
   _showDialog() async {
     await showDialog<String>(
@@ -129,9 +149,8 @@ class _AnswerState extends State<Answer> {
 
     return Visibility(
       visible: isV,
-      child: AnimatedOpacity(
-        opacity: isA ? 1.0 : 0.0,
-        duration: Duration(milliseconds: 300),
+      child: Transform(
+        transform: Matrix4.translationValues(_translateButton.value, 0.0, 0.0),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: RawMaterialButton(
@@ -165,7 +184,8 @@ class _AnswerState extends State<Answer> {
                           setState(() {
                             isA = widget.isExist;
                           });
-                          await Future.delayed(Duration(milliseconds: 310));
+                          _animationController.forward();
+                          await Future.delayed(Duration(milliseconds: 150));
                           setState(() {
                             isV = widget.isExist;
                           });

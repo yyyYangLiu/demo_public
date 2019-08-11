@@ -1,6 +1,7 @@
 
 
 import 'package:demo/dataBase/DatabaseHelper.dart';
+import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/items/own_item.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class OwnDataList extends StatefulWidget{
 }
 
 class OwnDataListState extends State<OwnDataList> {
-  List<String> list = [];
+  List<OwnDataDataBase> list = [];
   final dbHelper = DatabaseHelper.instance;
   List<Widget> DataList = [];
 
@@ -26,17 +27,17 @@ class OwnDataListState extends State<OwnDataList> {
   _loadData() async {
     final allRows = await dbHelper.queryAllRows();
     setState(() {
-      allRows.forEach((row) => list.add(row.toString()));
-      DataList.addAll(list.map((text) => OwnDataItem(name: text,)).toList());
+      allRows.forEach((row) => list.add(OwnDataDataBase(id: row["_id"],name: row["name"])));
+      DataList.addAll(list.map((text) => OwnDataItem(name: text.name, delete: deleteOne,)).toList());
     });
     print("touch load data");
     print(list);
   }
 
-  void updateList(List<String> list){
+  void updateList(List<OwnDataDataBase> list){
     print("get in second key");
     setState(() {
-      DataList.addAll(list.map((text) => OwnDataItem(name: text)).toList());
+      DataList.addAll(list.map((text) => OwnDataItem(name: text.name,delete: deleteOne,)).toList());
       print(DataList);
     });
   }
@@ -48,13 +49,17 @@ class OwnDataListState extends State<OwnDataList> {
     });
   }
 
+  void deleteOne(name){
+    print("get in to delete");
+    setState(() {
+      dbHelper.delete(name);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Column(
-        children: DataList,
-      ),
+    return Column(
+      children: DataList,
     );
   }
 }

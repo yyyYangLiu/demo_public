@@ -32,6 +32,8 @@ dependencies:
   sqflite: ^1.1.6
   path_provider: ^1.2.0
   path: ^1.6.2
+  random_color: ^1.0.3
+  flutter_local_notifications: ^0.8.1
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,5 @@
-import 'package:demo/data/floating_page/addOrsearchPage.dart';
-import 'package:demo/data/items/data_item.dart';
-import 'package:demo/data/widget/datalist.dart';
+import 'package:demo/CustomItem/CustomDialogAnswerPage.dart';
+import 'package:demo/CustomItem/CustomPageView.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -16,12 +15,7 @@ class _DataPageState extends State<DataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          physics: BouncingScrollPhysics(),
-          slivers: <Widget>[
-            DataList(),
-          ],
-        ),
+        child: CustomPageView(),
       ),
     );
   }

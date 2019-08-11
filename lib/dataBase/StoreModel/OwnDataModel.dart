@@ -1,8 +1,24 @@
 
-
-
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
+
+String clientToJson(OwnDataModel data){
+  final dyn = data.toJson();
+  return json.encode(dyn);
+}
+
+class OwnDataDataBase{
+  int id;
+  String name;
+  OwnDataDataBase({this.id,this.name});
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "name": name
+  };
+}
 
 class OwnDataModel{
 
@@ -22,17 +38,14 @@ class OwnDataModel{
     this.templateSelect,
   });
 
-  factory OwnDataModel.fromJson(Map<String,dynamic> json){
-
-    return OwnDataModel(
-      name: json["name"],
-      type: json["type"],
-      answer: json["answer"],
-      template: json["template"],
-      day: json["day"],
-      templateSelect: json["templateSelect"]
-    );
-  }
+  Map<String, dynamic> toJson() => {
+    "name" : name,
+    "type" : type,
+    "answer" : answer,
+    "template" : template.map((item) => item.toJson()).toList(),
+    "day" : day,
+    "templateSelect" : templateSelect
+  };
 
 }
 
@@ -42,5 +55,9 @@ class TemplateModel{
 
   TemplateModel({this.index, this.time});
 
+  Map<String, dynamic> toJson() =>{
+    "index" : index,
+    "time" : time.map((item) => item.toString()).toList()
+  };
 
 }

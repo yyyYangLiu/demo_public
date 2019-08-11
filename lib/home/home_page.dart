@@ -45,15 +45,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
       body: Stack(
         children: <Widget>[
-          TabBarView(
-            controller: _tabController,
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              DataPage(),
-              OwnPage(
-                key: _keyOwnPage,
-              )
-            ],
+          NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (overscroll){
+              overscroll.disallowGlow();
+            },
+            child: TabBarView(
+              controller: _tabController,
+              physics: BouncingScrollPhysics(),
+              children: <Widget>[
+                DataPage(),
+                OwnPage(
+                  key: _keyOwnPage,
+                )
+              ],
+            ),
           ),
           Align(
           alignment: Alignment.bottomRight,

@@ -1,5 +1,6 @@
 
 
+import 'package:demo/AnswerPage/AnswerDialog.dart';
 import 'package:demo/own/floating_page/PersonalDataPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +59,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
         curve: _curve
       )
     ));
+
     super.initState();
   }
 
@@ -135,8 +137,6 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
         onPressed: (){
           if (index == 1){
             _showDialog();
-          }else{
-
           }
         },
         tooltip: 'Add',
@@ -153,6 +153,18 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
         tooltip: 'Inbox',
         child: Icon(Icons.inbox),
       ),
+    );
+  }
+
+  Widget answer(){
+    return new Container(
+      child: FloatingActionButton(
+        heroTag: "answer",
+        onPressed: (){
+          AnswerDialog(context);
+        },
+        child: Icon(Icons.alarm),),
+
     );
   }
 
@@ -187,6 +199,10 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
       return Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
+          Transform(
+            transform: Matrix4.translationValues(0.0, _translateButton.value*3.0, 0.0),
+            child: answer(),
+          ),
           Transform(
               transform: Matrix4.translationValues(0.0, _translateButton.value * 2.0, 0.0),
               child: inbox()),

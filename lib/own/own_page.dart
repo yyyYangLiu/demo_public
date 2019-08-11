@@ -1,7 +1,5 @@
 
-
-import 'package:demo/dataBase/DatabaseHelper.dart';
-import 'package:demo/home/home_page.dart';
+import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/owndatalist/owndatalist.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +17,7 @@ class OwnPageState extends State<OwnPage> {
 
   GlobalKey<OwnDataListState> childkey = GlobalKey();
 
-  void updateList(List<String> list){
+  void updateList(List<OwnDataDataBase> list){
     print("get in first key");
     childkey.currentState.updateList(list);
   }
@@ -33,12 +31,18 @@ class OwnPageState extends State<OwnPage> {
 
     return Scaffold(
       body: SafeArea(
-          child: CustomScrollView(
+          child: ListView(
+            scrollDirection: Axis.vertical,
             physics: BouncingScrollPhysics(),
-            slivers: <Widget>[
+            children: <Widget>[
               OwnDataList(
                 key: childkey,
+              ),
+              Container(
+                height: 60,
+                color: Colors.transparent,
               )
+              //Safe Area
             ],
           )),
 
