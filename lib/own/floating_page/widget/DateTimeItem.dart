@@ -140,23 +140,24 @@ class _TimeItemState extends State<TimeItem> {
 
 
 class MinutesItem extends StatefulWidget{
-
+  int minutes;
+  MinutesItem({this.minutes});
   @override
   _MinutesItemState createState() => _MinutesItemState();
 }
 
 class _MinutesItemState extends State<MinutesItem> {
-  int _minutes = 1;
+
 
   _showDialog(){
     showDialog<int>(
       context: context,
       builder: (BuildContext context){
         return new NumberPickerDialog.integer(
-            minValue: 1, maxValue: 60, initialIntegerValue: _minutes);
+            minValue: 1, maxValue: 60, initialIntegerValue: widget.minutes);
       }).then((value){
         if (value != null){
-          setState( () => _minutes = value);
+          setState( () => widget.minutes = value);
         }
       });
 
@@ -175,7 +176,7 @@ class _MinutesItemState extends State<MinutesItem> {
               color: Colors.blue,
               child: Center(child: Padding(
                 padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                child: Text(_minutes.toString(),style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0)),
+                child: Text(widget.minutes.toString(),style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0)),
               )),
             )
         ),

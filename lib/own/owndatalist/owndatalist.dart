@@ -30,27 +30,21 @@ class OwnDataListState extends State<OwnDataList> {
       allRows.forEach((row) => list.add(OwnDataDataBase(id: row["_id"],name: row["name"])));
       DataList.addAll(list.map((text) => OwnDataItem(name: text.name, delete: deleteOne,)).toList());
     });
-    print("touch load data");
-    print(list);
   }
 
   void updateList(List<OwnDataDataBase> list){
-    print("get in second key");
     setState(() {
       DataList.addAll(list.map((text) => OwnDataItem(name: text.name,delete: deleteOne,)).toList());
-      print(DataList);
     });
   }
 
   void deleteAll(){
-    print("touch");
     setState(() {
       DataList = [];
     });
   }
 
   void deleteOne(name){
-    print("get in to delete");
     setState(() {
       dbHelper.delete(name);
     });

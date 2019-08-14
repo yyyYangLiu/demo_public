@@ -10,7 +10,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class PersonalDataPage extends StatefulWidget{
   String name;
   Function updateMainPage;
@@ -60,8 +59,6 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       List<DayTemplateSelector> filterdaytemplate = daytemplateSelector.where((item) => item.isSelectedDay).toList();
       print(filterdaytemplate.map((item) => labels[item.Dayindex]).toList());
       print(filterdaytemplate.map((item) => item.Templateindex).toList());
-
-
       //check tempaltes
       List<TemplateModel> templatemodel = filtertemplates.map((item) => TemplateModel(index: item.index, time: list[item.index].map((item) => item.time).toList())).toList();
 
@@ -75,6 +72,8 @@ class PersonalDataPageState extends State<PersonalDataPage> {
         day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
         templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
       );
+
+      // InputJson Data
       final String inputJson = clientToJson(owndatatest);
       print(clientToJson(owndatatest));
       Map<String, dynamic> row = {

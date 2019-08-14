@@ -1,9 +1,11 @@
-
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:demo/CustomItem/widget/AnswerItem.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CustomDialogAnswerPage extends StatefulWidget{
 
@@ -13,6 +15,7 @@ class CustomDialogAnswerPage extends StatefulWidget{
 }
 
 class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
+  final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
   var currentPage;
   final dbHelper = DatabaseHelper.instance;
@@ -27,12 +30,46 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
 
   _loadData() async {
     final allRows = await dbHelper.queryAllRows();
-    setState(() {
-      allRows.forEach((row) => list.add(OwnDataDataBase(id: row["_id"],name: row["name"])));
-      cardList.addAll(list.map((text) => AnswerItem(name: text.name, )).toList());
-    });
-    currentPage = cardList.length.toDouble() - 1.0;
+    allRows.forEach((row) => list.add(OwnDataDataBase(id: row["_id"],name: row["name"])));
+    for (OwnDataDataBase item in list) {
+      _readTime(item.name);
+    }
   }
+
+  _readTime(name) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path;
+    final file = await File('$path/$name.txt');
+    final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    String contents = await file.readAsString();
+
+    // get day
+    List<dynamic> switchdaylist = jsonDecode(contents)["day"];
+    List<String> dayList = switchdaylist.map((item) => item.toString()).toList();
+    // get day number count
+    List<dynamic> switchNumberlist = jsonDecode(contents)["template"];
+    List<dynamic> templateSelectList = jsonDecode(contents)["templateSelect"];
+
+    var now = new DateTime.now();
+    String todayWeekday = labels[now.weekday-1];
+    int indexforTemplateSelect = dayList.indexOf(todayWeekday);
+    int indexforTempalte = templateSelectList[indexforTemplateSelect];
+    var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
+    for (var timeString in alist){
+      String newtime = timeString.substring(10,15);
+      var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
+      // check time if before
+      int checkDate = now.compareTo(temptime);
+
+      if (checkDate == 1){
+        setState(() {
+          cardList.add(AnswerItem(name: name,time: newtime,));
+          currentPage = cardList.length.toDouble() - 1.0;
+        });
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +139,7 @@ class CardScrollWidgetState extends State<CardScrollWidget> {
 
             var primaryCardLeft = safeWidth - widthOfPrimaryCard;
             var horizontalInset = primaryCardLeft / 2;
+
             for(var i = 0; i< widget.list.length; i++){
               var delta = i - widget.currentPage;
               bool isOnRight = delta > 0;

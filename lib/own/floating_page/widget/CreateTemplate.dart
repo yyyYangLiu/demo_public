@@ -94,6 +94,7 @@ class _TemplateItemState extends State<TemplateItem> {
   bool _isCustom = false;
   bool _isFreq = false;
   bool _isSelected = false;
+  bool _showFreqPage = false;
 
   bool isV = true;
   bool isA = true;
@@ -156,11 +157,12 @@ class _TemplateItemState extends State<TemplateItem> {
 
   _CustomPage(){
 
+    DateTime time = DateTime.now();
+
     _addTimes(){
       setState(() {
-        widget.time.add(TimeItem(time: TimeOfDay(hour: 0, minute: 0),));
+        widget.time.add(TimeItem(time: TimeOfDay(hour: time.hour, minute: time.minute),));
       });
-
     }
 
     return Visibility(
@@ -198,37 +200,85 @@ class _TemplateItemState extends State<TemplateItem> {
 
   _FreqPage(){
 
+    DateTime time = DateTime.now();
+    TimeItem start = TimeItem(time: TimeOfDay(hour: time.hour, minute: time.minute));
+    TimeItem end = TimeItem(time:TimeOfDay(hour: time.hour, minute: time.minute));
+    MinutesItem gap = MinutesItem(minutes: 1,);
+
+
     return Visibility(
       visible: _isFreq,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(_radio),
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                    child: Text("Begin time", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0),)),
-              ),
-              TimeItem(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
+      child: Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_radio),
+          child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 4.0),
+                  child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("Finish time", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0),)),
-              ),
-              TimeItem(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Difference", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0),)),
-              ),
-              MinutesItem()
-            ],
+                      child: Text("Start", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 17.0),)),
+                ),
+                start,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 4.0),
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("End", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 17.0),)),
+                ),
+                end,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 4.0),
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Gap", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 17.0),)),
+                ),
+                gap,
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: RawMaterialButton(
+                      onPressed: (){
+                        print(start.time.runtimeType);
+                        print(start.time);
+                        print(end.time);
+                        print(gap.minutes);
+                        DateTime Dstart = DateTime(time.year, time.month, time.day, start.time.hour, start.time.minute);
+                        DateTime Dend = DateTime(time.year,time.month,time.day,end.time.hour,end.time.minute);
+
+                        int checkDate = Dstart.compareTo(Dend);
+                        print(checkDate);
+                        print(checkDate == -1);
+                        while (checkDate == -1){
+                          print("get inside");
+                          if (checkDate == -1){
+                            widget.time.add(TimeItem(time: TimeOfDay(hour: Dstart.hour, minute: Dstart.minute),));
+                          }
+                          Dstart = Dstart.add(Duration(minutes: gap.minutes));
+                          checkDate = Dstart.compareTo(Dend);
+                        }
+                        print(widget.time);
+                        setState(() {
+                          _isFreq = false;
+                          _isCustom = true;
+                        });
+
+                      },
+                      elevation: 2.0,
+                      fillColor: Colors.white,
+                      child: Text("Create",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       )
@@ -306,7 +356,6 @@ class _TemplateItemState extends State<TemplateItem> {
                       child: Text(widget.index.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0),),
                     ),
                   ),
-
                 ],
               ),
             ),

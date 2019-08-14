@@ -1,9 +1,14 @@
 
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:demo/AnswerPage/AnswerDialog.dart';
+import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/own/floating_page/PersonalDataPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class FancyFab extends StatefulWidget{
   final Function onPressed;
@@ -132,15 +137,25 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
 
   Widget add(index){
     return new Container(
-      child: FloatingActionButton(
-        heroTag: "add",
-        onPressed: (){
-          if (index == 1){
-            _showDialog();
-          }
-        },
-        tooltip: 'Add',
-        child: Icon(Icons.add),
+      width: 65,
+      child: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FloatingActionButton(
+              heroTag: "add",
+              onPressed: (){
+                if (index == 1){
+                  _showDialog();
+                }else{
+                  print("get into check");
+                }
+              },
+              tooltip: 'Add',
+              child: Icon(Icons.add),
+            ),
+          )
+        ],
       )
     );
   }
@@ -156,32 +171,114 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget answer(){
-    return new Container(
-      child: FloatingActionButton(
-        heroTag: "answer",
-        onPressed: (){
-          AnswerDialog(context);
-        },
-        child: Icon(Icons.alarm),),
+  // using to check the number of card
+  final dbHelper = DatabaseHelper.instance;
+  List<String> timeList = new List();
+  int count = 0;
 
+  // loading the data in the database
+  _loadData() async {
+    final allRows = await dbHelper.queryAllRows();
+    allRows.forEach((row) =>  _readTime(row["name"]));
+  }
+
+  // check the time meet the requirement
+  _readTime(name) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path;
+    final file = await File('$path/$name.txt');
+    final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    String contents = await file.readAsString();
+
+    // get day
+    List<dynamic> switchdaylist = jsonDecode(contents)["day"];
+    List<String> dayList = switchdaylist.map((item) => item.toString()).toList();
+    // get day number count
+    List<dynamic> switchNumberlist = jsonDecode(contents)["template"];
+    List<dynamic> templateSelectList = jsonDecode(contents)["templateSelect"];
+
+    var now = new DateTime.now();
+    String todayWeekday = labels[now.weekday-1];
+    int indexforTemplateSelect = dayList.indexOf(todayWeekday);
+    int indexforTempalte = templateSelectList[indexforTemplateSelect];
+    var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
+    for (var timeString in alist){
+      String newtime = timeString.substring(10,15);
+      var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
+      // check time if before
+      int checkDate = now.compareTo(temptime);
+      // unique
+      var uniqueNum = name+newtime;
+      if (checkDate == 1){
+        if (timeList.indexOf(uniqueNum) == -1){
+          timeList.add(uniqueNum);
+        }
+      }
+    }
+  }
+
+  Widget answer(){
+
+    _loadData();
+    setState(() {
+      count = timeList.length;
+    });
+
+    return Container(
+      height: 65,
+      width: 65,
+      child: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FloatingActionButton(
+              heroTag: "answer",
+              onPressed: (){
+                AnswerDialog(context);
+              },
+              child: Icon(Icons.alarm),),
+          ),
+          Positioned(
+            right: 0,
+            child: new Container(
+              padding: EdgeInsets.all(1),
+              decoration: new BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              constraints: BoxConstraints(
+                minWidth: 25,
+                minHeight: 25,
+              ),
+              child: Center(
+                child: new Text(
+                  count.toString(),
+                  style: new TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget toggle(){
-    return Container(
-      child: FloatingActionButton(
-        heroTag: "toggle",
-        backgroundColor: _animateColor.value,
-        onPressed: animate,
-        tooltip: 'Toggle',
-        child: AnimatedIcon(
-          icon: AnimatedIcons.menu_close,
-            progress: _animateIcon,
-        )
-      ),
+    return FloatingActionButton(
+      heroTag: "toggle",
+      backgroundColor: _animateColor.value,
+      onPressed: animate,
+      tooltip: 'Toggle',
+      child: AnimatedIcon(
+        icon: AnimatedIcons.menu_close,
+          progress: _animateIcon,
+      )
     );
   }
+
+
   @override
   Widget build(BuildContext context) {
     if (widget.tabController.index == 0){
@@ -194,7 +291,6 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
           toggle()
         ],
       );
-
     }else{
       return Column(
         mainAxisAlignment: MainAxisAlignment.end,

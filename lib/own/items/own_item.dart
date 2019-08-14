@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:demo/own/item_page/ItemPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 
 class OwnDataItem extends StatefulWidget{
@@ -35,6 +36,8 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
   // using to the count buttom (in this page)
   int totalcount = 0;
 
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
   void initState() {
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds:  300))
       ..addListener((){
@@ -50,16 +53,46 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
             0.75,
         )
     ));
+    _initNote();
     _readFile();
     super.initState();
   }
 
-  _readFile() async {
+  _initNote() async {
+    var initializationSettingsAndroid = new AndroidInitializationSettings("app_icon");
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(initializationSettingsAndroid,initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,onSelectNotification: onSelectnotification);
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  Future onSelectnotification(String payload) async {
+    showDialog(
+        context: context,
+        builder: (_){
+          return new AlertDialog(
+            title: Text("PayLoad"),
+            content: Text("PayLoad : $payload"),
+          );
+        }
+    );
+  }
+
+
+  final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+  _readDatabase() async {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path;
     final file = await File('$path/${widget.name}.txt');
     String contents = await file.readAsString();
-    print(contents);
+    return contents;
+  }
+
+  // for init value in the card
+  _readFile() async {
+    String contents = await _readDatabase();
     setState(() {
       // get Type
       answerType = jsonDecode(contents)["type"];
@@ -76,11 +109,49 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
       for (var index in templateSelectList){
           listcount.add(switchNumberlist.where((item) => item["index"].toString() == index.toString()).toList()[0]["time"].length);
       }
-
       // get the totalcount value
       listcount.forEach((item) => totalcount += item);
+
     });
   }
+
+  // init the remainder
+  _setRemainder() async {
+    String contents = await _readDatabase();
+    // get time in today
+    List<dynamic> switchNumberlist = jsonDecode(contents)["template"];
+    List<dynamic> templateSelectList = jsonDecode(contents)["templateSelect"];
+
+    var now = new DateTime.now();
+    String todayWeekday = labels[now.weekday-1];
+    int indexforTemplateSelect = dayList.indexOf(todayWeekday);
+    int indexforTempalte = templateSelectList[indexforTemplateSelect];
+    var list = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
+    int id = 0;
+    for (var timeString in list){
+      String newtime = timeString.substring(10,15);
+      Time time = new Time(int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]),0);
+      _showDailyAtTime(id,time,newtime,widget.name);
+      id ++;
+    }
+  }
+
+  Future _showDailyAtTime(id,time,newtime,name) async {
+    var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('repeatDailyAtTime channel id',
+        'repeatDailyAtTime channel name', 'repeatDailyAtTime description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(
+        id,
+        name,
+        newtime,
+        time,
+        platformChannelSpecifics);
+  }
+
 
   _readlistfile () async {
     final directory = await getApplicationDocumentsDirectory();
@@ -107,8 +178,10 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
     } catch(e) {}
   }
 
+  bool isSelectRemainder = false;
   @override
   Widget build(BuildContext context) {
+
     return Visibility(
       visible: isExist,
       child: Transform(
@@ -136,15 +209,46 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                   // Count Remainder
                   Align(
                     alignment: Alignment.topRight,
-                    child: RawMaterialButton(
-                      onPressed: (){},
-                      fillColor: Colors.red,
-                      constraints: BoxConstraints(minHeight: 30,minWidth: 30),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                    child: Container(
+                      width: 76,
+                      child: Row(
+                        children: <Widget>[
+                          GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  isSelectRemainder = !isSelectRemainder;
+                                  if (isSelectRemainder){
+                                    _setRemainder();
+                                  }else{
+                                    flutterLocalNotificationsPlugin.cancelAll();
+                                  }
+
+                                });
+                              },
+                              child: Icon(Icons.alarm,color: isSelectRemainder ? Colors.blue : Colors.grey,)),
+                          RawMaterialButton(
+                            onPressed: (){},
+                            fillColor: Colors.red,
+                            constraints: BoxConstraints(minHeight: 30,minWidth: 30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            child: Text(totalcount.toString(),style: TextStyle(color: Colors.white),),),
+                        ],
                       ),
-                      child: Text(totalcount.toString(),style: TextStyle(color: Colors.white),),),
+                    ),
                   ),
+//                  Align(
+//                    alignment: Alignment.topRight,
+//                    child: RawMaterialButton(
+//                      onPressed: (){},
+//                      fillColor: Colors.red,
+//                      constraints: BoxConstraints(minHeight: 30,minWidth: 30),
+//                      shape: RoundedRectangleBorder(
+//                        borderRadius: BorderRadius.circular(30.0),
+//                      ),
+//                      child: Text(totalcount.toString(),style: TextStyle(color: Colors.white),),),
+//                  ),
                   // Close Button
                   Align(
                     alignment: Alignment.topLeft,

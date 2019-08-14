@@ -10,7 +10,8 @@ import 'package:random_color/random_color.dart';
 
 class AnswerItem extends StatefulWidget{
   String name;
-  AnswerItem({this.name});
+  String time;
+  AnswerItem({this.name,this.time});
 
   @override
   _AnswerItemState createState() => _AnswerItemState();
@@ -33,7 +34,6 @@ class _AnswerItemState extends State<AnswerItem> {
     final path = directory.path;
     final file = await File('$path/${widget.name}.txt');
     String contents = await file.readAsString();
-    print(contents);
     setState(() {
       answerType = jsonDecode(contents)["type"];
       List<dynamic> dList = jsonDecode(contents)["answer"];
@@ -43,7 +43,7 @@ class _AnswerItemState extends State<AnswerItem> {
 
   Widget answerBar(){
     if (answerType == "yes"){
-      return YesAnswer();
+      return YesAnswer(name: widget.name,time: widget.time,);
     }else if (answerType == "mul"){
       return MulAnswer(answerList: answerList,);
     }else if (answerType == "ent"){
@@ -57,6 +57,7 @@ class _AnswerItemState extends State<AnswerItem> {
   Widget build(BuildContext context) {
     return RawMaterialButton(
       onPressed: (){
+
         print(answerList);
       },
       elevation: 4.0,
@@ -70,9 +71,13 @@ class _AnswerItemState extends State<AnswerItem> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
+            // Time
+            Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: Text(widget.time.toString(),style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 20.0),)),
             // Question
             Padding(
-              padding: EdgeInsets.only(left: 10.0,top: 50.0),
+              padding: EdgeInsets.only(left: 10.0,top: 25.0),
               child: Align(
                   alignment: Alignment.topLeft,
                   child: Text(widget.name,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 30.0),)),
@@ -91,6 +96,10 @@ class _AnswerItemState extends State<AnswerItem> {
 }
 
 class YesAnswer extends StatelessWidget{
+  String name;
+  String time;
+  YesAnswer({this.name,this.time});
+
   @override
   Widget build(BuildContext context) {
 
@@ -107,6 +116,8 @@ class YesAnswer extends StatelessWidget{
                 padding: const EdgeInsets.all(8.0),
                 child: RawMaterialButton(
                   onPressed: (){
+                    print(name);
+                    print(time);
                     print("touch yes");
                   },
                   elevation: 2.0,
@@ -122,6 +133,8 @@ class YesAnswer extends StatelessWidget{
                 padding: const EdgeInsets.all(8.0),
                 child: RawMaterialButton(
                   onPressed: (){
+                    print(name);
+                    print(time);
                     print("touch no");
                   },
                   elevation: 2.0,

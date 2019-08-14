@@ -47,7 +47,7 @@ class _ItemPageState extends State<ItemPage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: BackButton(color: Colors.black,),
         backgroundColor: Colors.white,
@@ -68,7 +68,7 @@ class _ItemPageState extends State<ItemPage> {
           body: ClipRRect(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0),topRight: Radius.circular(20.0)),
             child: Container(
-              color: Colors.white,
+              color: Colors.black,
               child: NotificationListener<OverscrollIndicatorNotification>(
                 onNotification: (overscroll){
                   overscroll.disallowGlow();
@@ -115,7 +115,7 @@ class _ItemPageState extends State<ItemPage> {
   }
 
   Future _showDailyAtTime() async {
-    var time = new Time(18, 40, 0);
+    var time = new Time(13, 52, 0);
     var androidPlatformChannelSpecifics =
     new AndroidNotificationDetails('repeatDailyAtTime channel id',
         'repeatDailyAtTime channel name', 'repeatDailyAtTime description');
