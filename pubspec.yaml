@@ -34,6 +34,8 @@ dependencies:
   path: ^1.6.2
   random_color: ^1.0.3
   flutter_local_notifications: ^0.8.1
+  random_string: ^1.1.0
+  flutter_spinkit: ^2.1.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
@@ -9,6 +10,7 @@ import 'package:demo/own/floating_page/widget/TypeBar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:random_string/random_string.dart';
 
 class PersonalDataPage extends StatefulWidget{
   String name;
@@ -21,6 +23,7 @@ class PersonalDataPage extends StatefulWidget{
 
 class PersonalDataPageState extends State<PersonalDataPage> {
   final dbHelper = DatabaseHelper.instance;
+  final cdbHelper = CustomDatabaseHelper.instance;
   final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
   List<TemplateItem> templates = [];
@@ -76,12 +79,9 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       // InputJson Data
       final String inputJson = clientToJson(owndatatest);
       print(clientToJson(owndatatest));
-      Map<String, dynamic> row = {
-        DatabaseHelper.columnName : widget.name
-      };
 
-      final id = await dbHelper.insert(row);
-      print('inserted row id: $id');
+      // put data into Database
+      _insertDatabase();
 
       final allRows = await dbHelper.queryAllRows();
       print('query all rows:');
@@ -95,6 +95,41 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       _createFile(inputJson);
       _readFile();
       Navigator.of(context).pop();
+  }
+
+  _insertDatabase() async {
+    // check if the uniqueid is unique
+    bool isNotEmpty = true;
+    String uniqueId = randomAlpha(31);
+    print(uniqueId);
+    var checkData = dbHelper.checkUnique(uniqueId);
+    checkData.then((response){
+      print(response);
+      isNotEmpty = response.length != 0;
+    });
+
+    if (isNotEmpty){
+      print("get into change random value");
+      uniqueId = randomAlpha(31);
+    }
+
+    print(uniqueId);
+
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnName : widget.name,
+      "uniqueId" : uniqueId
+    };
+
+    final id = await dbHelper.insert(row);
+    print('inserted row id: $id');
+
+    if (selectType == "yes"){
+      print("get into function");
+      var db = cdbHelper.database;
+      db.then((database){
+        cdbHelper.onCreate(database, uniqueId);
+      });
+    }
   }
 
   _createFile(inputJson) async {

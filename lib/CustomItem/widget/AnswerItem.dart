@@ -1,9 +1,7 @@
-
-
-
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:demo/dataBase/CustomDatabaseHelper.dart';
+import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_color/random_color.dart';
@@ -52,13 +50,28 @@ class _AnswerItemState extends State<AnswerItem> {
       return Container(height: 10, color: Colors.transparent,);
     }
   }
+  final db = CustomDatabaseHelper.instance;
+  final searchdb = DatabaseHelper.instance;
 
   @override
   Widget build(BuildContext context) {
+
+    // define uniqueId
+    String tableName;
+    // find the uniqueId by name
+    var getUniqueId = searchdb.getData(widget.name);
+    getUniqueId.then((response){
+      // get the uniqueId
+      tableName = response[0]["uniqueId"];
+
+    });
     return RawMaterialButton(
       onPressed: (){
-
-        print(answerList);
+        db.show(widget.name);
+        var table = db.queryAllRows(tableName);
+        table.then((item){
+          print(item);
+        });
       },
       elevation: 4.0,
       fillColor: Colors.white,
@@ -86,7 +99,6 @@ class _AnswerItemState extends State<AnswerItem> {
             Align(
                 alignment: Alignment.bottomCenter,
                 child: answerBar()),
-
           ],
         ),
       ),
@@ -95,13 +107,42 @@ class _AnswerItemState extends State<AnswerItem> {
 
 }
 
-class YesAnswer extends StatelessWidget{
+// class for yes answer
+class YesAnswer extends StatefulWidget{
   String name;
   String time;
   YesAnswer({this.name,this.time});
 
   @override
+  _YesAnswerState createState() => _YesAnswerState();
+}
+
+class _YesAnswerState extends State<YesAnswer> with TickerProviderStateMixin{
+  final db = CustomDatabaseHelper.instance;
+  final searchdb = DatabaseHelper.instance;
+
+
+  bool isSelecteYes = false;
+  bool isSelecteNo = false;
+
+  @override
+  void initState() {
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    // define uniqueId
+    String tableName;
+    // find the uniqueId by name
+    var getUniqueId = searchdb.getData(widget.name);
+    getUniqueId.then((response){
+      // get the uniqueId
+      tableName = response[0]["uniqueId"];
+
+    });
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -109,41 +150,86 @@ class YesAnswer extends StatelessWidget{
         alignment: Alignment.bottomCenter,
         child: Container(
           width: 250,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RawMaterialButton(
-                  onPressed: (){
-                    print(name);
-                    print(time);
-                    print("touch yes");
-                  },
-                  elevation: 2.0,
-                  fillColor: Colors.red,
-                  constraints: BoxConstraints(minHeight: 70,minWidth: 100),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)
+              AnimatedOpacity(
+                opacity: isSelecteNo ? 0.0 : 1.0,
+                duration: Duration(milliseconds: 50),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: AnimatedSize(
+                    vsync: this,
+                    duration: Duration(milliseconds: 250),
+                    curve: Curves.fastOutSlowIn,
+                    child: RawMaterialButton(
+                      onPressed: (){
+                        DateTime now = DateTime.now();
+                        String currenttime = now.hour.toString() +":" + now.minute.toString();
+                        Map<String, dynamic> row = new Map<String,dynamic>();
+                        row["createyear"] = now.year.toString();
+                        row["createmonth"] = now.month.toString();
+                        row["createdate"] = now.day.toString();
+                        row["createweek"] = now.weekday.toString();
+                        row["createtime"] = widget.time;
+                        row["answertime"] = currenttime;
+                        row["answer"] = "yes";
+                        db.insert(row, tableName);
+                        // _animationController.forward();
+                        setState(() {
+                          isSelecteYes = true;
+                        });
+                      },
+                      elevation: 2.0,
+                      fillColor: Colors.red,
+                      splashColor: Colors.transparent,
+                      constraints: BoxConstraints(minHeight: 70,minWidth: isSelecteYes? 250 : 100),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0)
+                      ),
+                      child: Text("YES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0),) ,
+                    ),
                   ),
-                  child: Text("YES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0),) ,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RawMaterialButton(
-                  onPressed: (){
-                    print(name);
-                    print(time);
-                    print("touch no");
-                  },
-                  elevation: 2.0,
-                  fillColor: Colors.blue,
-                  constraints: BoxConstraints(minHeight: 70,minWidth: 100),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)
+              AnimatedOpacity(
+                opacity: isSelecteYes ? 0.0 : 1.0,
+                duration: Duration(milliseconds: 50),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: AnimatedSize(
+                      vsync: this,
+                      duration: Duration(milliseconds: 250),
+                      curve: Curves.fastOutSlowIn,
+                      child: RawMaterialButton(
+                        onPressed: (){
+                          DateTime now = DateTime.now();
+                          String currenttime = now.hour.toString() +":" + now.minute.toString();
+                          Map<String, dynamic> row = new Map<String,dynamic>();
+                          row["createyear"] = now.year.toString();
+                          row["createmonth"] = now.month.toString();
+                          row["createdate"] = now.day.toString();
+                          row["createweek"] = now.weekday.toString();
+                          row["createtime"] = widget.time;
+                          row["answertime"] = currenttime;
+                          row["answer"] = "no";
+                          db.insert(row, tableName);
+                          setState(() {
+                            isSelecteNo = true;
+                          });
+                        },
+                        elevation: 2.0,
+                        fillColor: Colors.blue,
+                        splashColor: Colors.transparent,
+                        constraints: BoxConstraints(minHeight: 70,minWidth: isSelecteNo ? 250 : 100),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)
+                        ),
+                        child: Text("NO",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0)),
+                      ),
+                    ),
                   ),
-                  child: Text("NO",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30.0)),
                 ),
               )
             ],
@@ -154,6 +240,7 @@ class YesAnswer extends StatelessWidget{
   }
 }
 
+// class for mul answer
 class MulAnswer extends StatelessWidget{
   List<String> answerList;
   MulAnswer({this.answerList});
@@ -193,6 +280,7 @@ class MulAnswer extends StatelessWidget{
   }
 }
 
+// class for ent answer
 class EntAnswer extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
@@ -202,5 +290,6 @@ class EntAnswer extends StatelessWidget{
         child: Container(
             height: 10,
             color: Colors.black));
+
   }
 }

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:demo/CustomItem/widget/AnswerItem.dart';
+import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
 
 class CustomDialogAnswerPage extends StatefulWidget{
@@ -19,6 +21,7 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
 
   var currentPage;
   final dbHelper = DatabaseHelper.instance;
+  final customdbHelper = CustomDatabaseHelper.instance;
 
   List<Widget> cardList = new List();
   List<OwnDataDataBase> list = new List();
@@ -61,14 +64,27 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
       // check time if before
       int checkDate = now.compareTo(temptime);
 
-      if (checkDate == 1){
-        setState(() {
-          cardList.add(AnswerItem(name: name,time: newtime,));
-          currentPage = cardList.length.toDouble() - 1.0;
+
+      var dbH = dbHelper.getData(name);
+      dbH.then((response){
+        String uniqueId = response[0]["uniqueId"];
+        var dbC = customdbHelper.checkTime(newtime, uniqueId);
+        dbC.then((response){
+          bool check = response.length == 0;
+          if (check){
+            if (checkDate == 1){
+              setState(() {
+                cardList.add(AnswerItem(name: name,time: newtime,));
+                currentPage = cardList.length.toDouble() - 1.0;
+              });
+            }
+          }
         });
-      }
+      });
     }
   }
+
+
 
 
   @override
@@ -98,7 +114,11 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
         ),
       );
     }else{
-      return Container();
+      return SpinKitFadingFour(
+        color: Colors.white,
+        size: 50.0,
+
+      );
     }
   }
 }

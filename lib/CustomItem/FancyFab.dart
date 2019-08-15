@@ -4,11 +4,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:demo/AnswerPage/AnswerDialog.dart';
+import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/own/floating_page/PersonalDataPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:random_string/random_string.dart';
 
 class FancyFab extends StatefulWidget{
   final Function onPressed;
@@ -74,15 +76,6 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  animate(){
-    if(!isOpened){
-      _animationController.forward();
-    } else{
-      _animationController.reverse();
-    }
-    isOpened = !isOpened;
-  }
-
   _showDialog() async {
     await showDialog<String>(
         context: context,
@@ -136,6 +129,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
   }
 
   Widget add(index){
+    String randomString = randomAlpha(30);
     return new Container(
       width: 65,
       child: Stack(
@@ -148,11 +142,13 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
                 if (index == 1){
                   _showDialog();
                 }else{
-                  print("get into check");
+                  setState(() {
+                    randomString = randomAlpha(30);
+                  });
                 }
               },
               tooltip: 'Add',
-              child: Icon(Icons.add),
+              child: Text(randomString),
             ),
           )
         ],
@@ -173,6 +169,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
 
   // using to check the number of card
   final dbHelper = DatabaseHelper.instance;
+  final cdbHelper = CustomDatabaseHelper.instance;
   List<String> timeList = new List();
   int count = 0;
 
@@ -180,6 +177,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
   _loadData() async {
     final allRows = await dbHelper.queryAllRows();
     allRows.forEach((row) =>  _readTime(row["name"]));
+
   }
 
   // check the time meet the requirement
@@ -207,13 +205,27 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
       var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
       // check time if before
       int checkDate = now.compareTo(temptime);
-      // unique
-      var uniqueNum = name+newtime;
-      if (checkDate == 1){
-        if (timeList.indexOf(uniqueNum) == -1){
-          timeList.add(uniqueNum);
-        }
-      }
+
+
+      var dbH = dbHelper.getData(name);
+
+      dbH.then((response){
+        String uniqueId = response[0]["uniqueId"];
+        var dbC = cdbHelper.checkTime(newtime, uniqueId);
+        dbC.then((response){
+          bool check = response.length == 0;
+          var uniqueNum = name+newtime;
+          if (check){
+            if (checkDate == 1){
+              if (timeList.indexOf(uniqueNum) == -1){
+                timeList.add(uniqueNum);
+              }
+            }
+          }else{
+            timeList.remove(uniqueNum);
+          }
+        });
+      });
     }
   }
 
@@ -238,23 +250,26 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
               },
               child: Icon(Icons.alarm),),
           ),
-          Positioned(
-            right: 0,
-            child: new Container(
-              padding: EdgeInsets.all(1),
-              decoration: new BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              constraints: BoxConstraints(
-                minWidth: 25,
-                minHeight: 25,
-              ),
-              child: Center(
-                child: new Text(
-                  count.toString(),
-                  style: new TextStyle(
-                    color: Colors.white,
+          Visibility(
+            visible: isOpened,
+            child: Positioned(
+              right: 0,
+              child: new Container(
+                padding: EdgeInsets.all(1),
+                decoration: new BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 25,
+                  minHeight: 25,
+                ),
+                child: Center(
+                  child: new Text(
+                    count.toString(),
+                    style: new TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -265,19 +280,58 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget toggle(){
-    return FloatingActionButton(
-      heroTag: "toggle",
-      backgroundColor: _animateColor.value,
-      onPressed: animate,
-      tooltip: 'Toggle',
-      child: AnimatedIcon(
-        icon: AnimatedIcons.menu_close,
-          progress: _animateIcon,
-      )
-    );
+  animate(){
+    if(!isOpened){
+      _animationController.forward();
+    } else{
+      _animationController.reverse();
+    }
+    setState(() {
+      isOpened = !isOpened;
+    });
+
   }
 
+  Widget toggle(){
+    bool isExist = timeList.length != 0;
+    return Container(
+      width: 65,
+      child: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FloatingActionButton(
+                heroTag: "toggle",
+                backgroundColor: _animateColor.value,
+                onPressed: animate,
+                tooltip: 'Toggle',
+                child: AnimatedIcon(
+                  icon: AnimatedIcons.menu_close,
+                  progress: _animateIcon,
+                )
+            ),
+          ),
+          Visibility(
+            visible: isExist,
+            child: Positioned(
+              right: 5,
+              child: new Container(
+                padding: EdgeInsets.all(1),
+                decoration: new BoxDecoration(
+                  color: isOpened ? Colors.deepPurple : Colors.red,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 15,
+                  minHeight: 15,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

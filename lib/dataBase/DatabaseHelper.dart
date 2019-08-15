@@ -12,10 +12,11 @@ class DatabaseHelper{
   static final _databaseName = "MyDatabase.db";
   static final _databaseVersion = 1;
 
-  static final table = 'my_table';
+  static final table = 'NameList';
 
   static final columnId = '_id';
   static final columnName = 'name';
+  static final columnUniqueId = "uniqueId";
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -31,22 +32,24 @@ class DatabaseHelper{
   _initDatabase() async {
       Directory documentsDirectory = await getApplicationDocumentsDirectory();
       String path = join(documentsDirectory.path, _databaseName);
-      return await openDatabase(path,
-                                version: _databaseVersion,
+      return await openDatabase(path,version: _databaseVersion,
       onCreate: _onCreate);
   }
 
   Future _onCreate(Database db, int version) async {
+    print("get into create");
     await db.execute('''
       CREATE TABLE $table (
         $columnId INTEGER PRIMARY KEY,
-        $columnName TEXT NOT NULL
+        $columnName TEXT NOT NULL,
+        $columnUniqueId TEXT NOT NULL
       )
     ''');
   }
 
   Future<int> insert(Map<String, dynamic> row) async {
     Database db = await instance.database;
+    print(db);
     return await db.insert(table, row);
   }
 
@@ -58,6 +61,11 @@ class DatabaseHelper{
   Future<List<Map<String, dynamic>>> getData(String name) async {
     Database db = await instance.database;
     return await db.query(table, where: "name = ?",whereArgs: [name]);
+  }
+
+  Future<List<Map<String, dynamic>>> checkUnique(String uniqueId) async {
+    Database db = await instance.database;
+    return await db.query(table, where: "$columnUniqueId = ?",whereArgs: [uniqueId]);
   }
 
   Future<int> queryRowCount() async{
@@ -75,10 +83,26 @@ class DatabaseHelper{
     Database db = await instance.database;
     return await db.delete(table, where: '$columnName = ?', whereArgs: [name]);
   }
+  
+  void deleteTable () async {
+    Database db= await instance.database;
+    db.rawDelete("DROP TABLE IF EXISTS $table");
+  }
 
-  deleteAll() async {
+  void deleteAll() async {
     Database db =await instance.database;
     db.rawDelete("DELETE FROM $table");
+  }
+
+  // show the name for all the table in the database
+  void show() async {
+    Database db = await instance.database;
+    final data = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+    data.then((name){
+      for (Map i in name){
+        print(i["name"]);
+      }
+    });
   }
 
 }
