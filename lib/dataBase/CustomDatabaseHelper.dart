@@ -73,6 +73,26 @@ class CustomDatabaseHelper{
     return await db.query(table,where: "$columnCreateTime = ?",whereArgs: [time]);
   }
 
+  Future<List<Map<String, dynamic>>> getDataByDate(String date, String table) async {
+    Database db = await instance.database;
+    return await db.query(table,where: "$columnCreateDate = ?",whereArgs: [date]);
+  }
+
+  Future<int> queryRowCountByDateYes(String table,String date) async {
+    Database db = await instance.database;
+    return Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM $table WHERE $columnCreateDate = $date AND $columnAnswer = 'yes'",[]));
+  }
+
+  Future<int> queryRowCountByDateNo(String table,String date) async {
+    Database db = await instance.database;
+    return Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM $table WHERE $columnCreateDate = $date AND $columnAnswer = 'no'",[]));
+  }
+
+  Future<int> queryRowCountByDate(String table,String date) async {
+    Database db = await instance.database;
+    return Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM $table WHERE $columnCreateDate = $date"));
+  }
+
   Future<int> queryRowCount(String table) async{
     Database db = await instance.database;
     return Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $table'));

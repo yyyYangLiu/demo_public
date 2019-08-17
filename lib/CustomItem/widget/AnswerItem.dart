@@ -43,9 +43,9 @@ class _AnswerItemState extends State<AnswerItem> {
     if (answerType == "yes"){
       return YesAnswer(name: widget.name,time: widget.time,);
     }else if (answerType == "mul"){
-      return MulAnswer(answerList: answerList,);
+      return MulAnswer(name: widget.name,time: widget.time, answerList: answerList,);
     }else if (answerType == "ent"){
-      return EntAnswer();
+      return EntAnswer(name: widget.name,time: widget.time,);
     }else{
       return Container(height: 10, color: Colors.transparent,);
     }
@@ -118,18 +118,12 @@ class YesAnswer extends StatefulWidget{
 }
 
 class _YesAnswerState extends State<YesAnswer> with TickerProviderStateMixin{
-  final db = CustomDatabaseHelper.instance;
-  final searchdb = DatabaseHelper.instance;
-
 
   bool isSelecteYes = false;
   bool isSelecteNo = false;
 
-  @override
-  void initState() {
-
-    super.initState();
-  }
+  final db = CustomDatabaseHelper.instance;
+  final searchdb = DatabaseHelper.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -241,18 +235,57 @@ class _YesAnswerState extends State<YesAnswer> with TickerProviderStateMixin{
 }
 
 // class for mul answer
-class MulAnswer extends StatelessWidget{
+class MulAnswer extends StatefulWidget{
+  String name;
+  String time;
   List<String> answerList;
-  MulAnswer({this.answerList});
+  MulAnswer({this.name,this.time,this.answerList});
+
+  @override
+  _MulAnswerState createState() => _MulAnswerState();
+}
+
+class _MulAnswerState extends State<MulAnswer> with TickerProviderStateMixin{
+  String selectedString = "";
+  bool isSelected = false;
+
+  final db = CustomDatabaseHelper.instance;
+  final searchdb = DatabaseHelper.instance;
 
   Widget MulAnswerItem (text){
     RandomColor rdColor = RandomColor();
     Color _color = rdColor.randomColor();
+
+    // define uniqueId
+    String tableName;
+    // find the uniqueId by name
+    var getUniqueId = searchdb.getData(widget.name);
+    getUniqueId.then((response){
+      // get the uniqueId
+      tableName = response[0]["uniqueId"];
+
+    });
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RawMaterialButton(
         onPressed: (){
-          print("touch no");
+          print("touch no $text");
+          DateTime now = DateTime.now();
+          String currenttime = now.hour.toString() +":" + now.minute.toString();
+          Map<String, dynamic> row = new Map<String,dynamic>();
+          row["createyear"] = now.year.toString();
+          row["createmonth"] = now.month.toString();
+          row["createdate"] = now.day.toString();
+          row["createweek"] = now.weekday.toString();
+          row["createtime"] = widget.time;
+          row["answertime"] = currenttime;
+          row["answer"] = text;
+          db.insert(row, tableName);
+          setState(() {
+            isSelected = true;
+            selectedString = text;
+          });
         },
         elevation: 2.0,
         fillColor: _color,
@@ -272,24 +305,129 @@ class MulAnswer extends StatelessWidget{
       alignment: Alignment.bottomCenter,
       child: Container(
         height: 90,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: answerList.map((text) => MulAnswerItem(text)).toList(),
+        child: Stack(
+          children: <Widget>[
+            AnimatedOpacity(
+              opacity: isSelected ? 0.0 : 1.0,
+              duration: Duration(milliseconds: 300),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: widget.answerList.map((text) => MulAnswerItem(text)).toList(),
+              ),
+            ),
+            AnimatedSize(
+              vsync: this,
+              duration: Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Container(
+                    color: Colors.blue,
+                    height: 70,
+                    width: isSelected ? 250 : 0,
+                    child: Center(
+                      child: Text(selectedString,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
         ),
       ),);
   }
 }
 
 // class for ent answer
-class EntAnswer extends StatelessWidget{
+class EntAnswer extends StatefulWidget{
+  String name;
+  String time;
+  EntAnswer({this.name,this.time});
+
+  @override
+  _EntAnswerState createState() => _EntAnswerState();
+}
+
+class _EntAnswerState extends State<EntAnswer> with TickerProviderStateMixin{
+  TextEditingController enterController = new TextEditingController();
+  String resultString = "";
+  bool isSelected = false;
+
+  final db = CustomDatabaseHelper.instance;
+  final searchdb = DatabaseHelper.instance;
+
   @override
   Widget build(BuildContext context) {
 
+    // define uniqueId
+    String tableName;
+    // find the uniqueId by name
+    var getUniqueId = searchdb.getData(widget.name);
+    getUniqueId.then((response){
+      // get the uniqueId
+      tableName = response[0]["uniqueId"];
+
+    });
+
     return Align(
         alignment: Alignment.bottomCenter,
-        child: Container(
-            height: 10,
-            color: Colors.black));
-
+        child: Stack(
+          children: <Widget>[
+            AnimatedOpacity(
+              opacity: isSelected ? 0.0 : 1.0,
+              duration: Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: enterController,
+                  autocorrect: true,
+                  onSubmitted: (text){
+                    print("touch no $text");
+                    DateTime now = DateTime.now();
+                    String currenttime = now.hour.toString() +":" + now.minute.toString();
+                    Map<String, dynamic> row = new Map<String,dynamic>();
+                    row["createyear"] = now.year.toString();
+                    row["createmonth"] = now.month.toString();
+                    row["createdate"] = now.day.toString();
+                    row["createweek"] = now.weekday.toString();
+                    row["createtime"] = widget.time;
+                    row["answertime"] = currenttime;
+                    row["answer"] = text;
+                    db.insert(row, tableName);
+                    setState(() {
+                      resultString = text;
+                      isSelected = true;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Name : ",
+                      hintText: 'Create a name'),
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ),
+            AnimatedSize(
+              vsync: this,
+              duration: Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Container(
+                    color: Colors.blue,
+                    height: 70,
+                    width: isSelected ? 250 : 0,
+                    child: Center(
+                      child: Text(resultString,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ));
   }
 }
+

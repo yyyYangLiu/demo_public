@@ -65,21 +65,6 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       //check tempaltes
       List<TemplateModel> templatemodel = filtertemplates.map((item) => TemplateModel(index: item.index, time: list[item.index].map((item) => item.time).toList())).toList();
 
-      OwnDataModel owndatatest =
-
-      OwnDataModel(
-        name: widget.name,
-        type: selectType,
-        answer: fliteranswers.map((item) => item.text).toList(),
-        template: templatemodel,
-        day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
-        templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
-      );
-
-      // InputJson Data
-      final String inputJson = clientToJson(owndatatest);
-      print(clientToJson(owndatatest));
-
       // put data into Database
       _insertDatabase();
 
@@ -92,8 +77,26 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       outputlist.add(OwnDataDataBase(id: check[0]["id"], name: check[0]["name"]));
 
       widget.updateMainPage(outputlist);
+
+      // inputJson
+      OwnDataModel owndatatest =
+
+      OwnDataModel(
+          name: widget.name,
+          type: selectType,
+          answer: fliteranswers.map((item) => item.text).toList(),
+          template: templatemodel,
+          day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
+          templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()
+      );
+
+      // InputJson Data
+      final String inputJson = clientToJson(owndatatest);
+      print(clientToJson(owndatatest));
+      // Create Data into txt
       _createFile(inputJson);
       _readFile();
+
       Navigator.of(context).pop();
   }
 
@@ -115,21 +118,26 @@ class PersonalDataPageState extends State<PersonalDataPage> {
 
     print(uniqueId);
 
+    DateTime now = DateTime.now();
+
+    String createDate = now.year.toString() + ":" + now.month.toString() + ":" + now.day.toString();
+
     Map<String, dynamic> row = {
       DatabaseHelper.columnName : widget.name,
-      "uniqueId" : uniqueId
+      "uniqueId" : uniqueId,
+      "createDate" : createDate
     };
 
     final id = await dbHelper.insert(row);
     print('inserted row id: $id');
 
-    if (selectType == "yes"){
-      print("get into function");
-      var db = cdbHelper.database;
-      db.then((database){
-        cdbHelper.onCreate(database, uniqueId);
-      });
-    }
+
+    print("get into function");
+    var db = cdbHelper.database;
+    db.then((database){
+      cdbHelper.onCreate(database, uniqueId);
+    });
+
   }
 
   _createFile(inputJson) async {

@@ -36,6 +36,10 @@ dependencies:
   flutter_local_notifications: ^0.8.1
   random_string: ^1.1.0
   flutter_spinkit: ^2.1.0
+  bezier_chart:
+    git:
+      url: git://github.com/aeyrium/bezier-chart.git
+      ref: master
 
 dev_dependencies:
   flutter_test:

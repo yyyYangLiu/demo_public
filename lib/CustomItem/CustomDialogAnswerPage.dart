@@ -26,9 +26,24 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
   List<Widget> cardList = new List();
   List<OwnDataDataBase> list = new List();
 
+  PageController controller;
+
+
+
   initState(){
     _loadData();
+    _PageController();
     super.initState();
+  }
+
+  _PageController() async {
+    controller = new PageController(initialPage: cardList.length - 1);
+    controller.addListener((){
+      setState(() {
+        currentPage = controller.page;
+      });
+    });
+
   }
 
   _loadData() async {
@@ -76,10 +91,16 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
               setState(() {
                 cardList.add(AnswerItem(name: name,time: newtime,));
                 currentPage = cardList.length.toDouble() - 1.0;
+                Future.delayed(Duration(milliseconds: 100), () {
+                  print("jump");
+                  print(cardList.length - 1);
+                  controller.jumpToPage(cardList.length - 1);
+                });
               });
             }
           }
         });
+
       });
     }
   }
@@ -89,13 +110,9 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
 
   @override
   Widget build(BuildContext context) {
-    PageController controller = new PageController(initialPage: cardList.length - 1);
-    controller.addListener((){
-      setState(() {
-        currentPage = controller.page;
-      });
-    });
+
     if (cardList.length != 0){
+
       return Container(
         child: Stack(
           children: <Widget>[
@@ -104,6 +121,7 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
               itemCount: cardList.length,
               controller: controller,
               reverse: true,
+              physics: BouncingScrollPhysics(),
               itemBuilder: (context,index){
                 return Container();
             },)),
