@@ -11,12 +11,10 @@ packages:
   bezier_chart:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: f291a386f7510b34f0e8a8dad6eb4ccca5c39a8d
-      url: "git://github.com/aeyrium/bezier-chart.git"
-    source: git
-    version: "1.0.13"
+      name: bezier_chart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.14"
   boolean_selector:
     dependency: transitive
     description:
@@ -153,6 +151,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  pie_chart:
+    dependency: "direct main"
+    description:
+      name: pie_chart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   platform:
     dependency: transitive
     description:
