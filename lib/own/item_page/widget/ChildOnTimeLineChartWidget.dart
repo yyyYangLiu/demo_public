@@ -34,7 +34,8 @@ class _ChildOnTimeLineChartWidgetState extends State<ChildOnTimeLineChartWidget>
       // get the uniqueId
       String tableName = response[0]["uniqueId"];
       print(tableName);
-      var data = db.queryAllRows(tableName);
+      DateTime now = DateTime.now();
+      var data = db.getTodayValues(tableName,now.year.toString(),now.month.toString(),now.day.toString());
       data.then((response){
         onTime = 0;
         notonTime = 0;
@@ -59,6 +60,7 @@ class _ChildOnTimeLineChartWidgetState extends State<ChildOnTimeLineChartWidget>
 
   @override
   Widget build(BuildContext context) {
+    print("###############");
     print(onTime);
     print(onTimePer);
     print(notonTime);
@@ -112,6 +114,7 @@ class localItem extends StatefulWidget{
 }
 
 class _localItemState extends State<localItem> with TickerProviderStateMixin{
+
   @override
   Widget build(BuildContext context) {
     if (widget.type == "background"){
@@ -127,7 +130,15 @@ class _localItemState extends State<localItem> with TickerProviderStateMixin{
         ),
       );
     }else{
-
+      double percentage = 0.0;
+      if (widget.percentage < 0.05 && widget.percentage != 0){
+        percentage = 0.05;
+      }else if (widget.percentage > 0.95 && widget.percentage != 1){
+        print("touch 0.95");
+        percentage = 0.90;
+      }else{
+        percentage = widget.percentage;
+      }
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: ClipRRect(
@@ -137,7 +148,7 @@ class _localItemState extends State<localItem> with TickerProviderStateMixin{
             duration: Duration(milliseconds: 300),
             child: Container(
               height: 50,
-              width: widget.count != null ? 400 * widget.percentage : 0,
+              width: widget.count != null ? 400 * percentage : 0,
               color: widget.color,
               child: Align(
                   alignment: Alignment.centerLeft,

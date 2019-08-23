@@ -75,19 +75,22 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
     var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
     for (var timeString in alist){
       String newtime = timeString.substring(10,15);
+      print(newtime);
       var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
       // check time if before
       int checkDate = now.compareTo(temptime);
-
-
+      print(checkDate);
+      print(name);
       var dbH = dbHelper.getData(name);
       dbH.then((response){
         String uniqueId = response[0]["uniqueId"];
-        var dbC = customdbHelper.checkTime(newtime, uniqueId);
+        var dbC = customdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
         dbC.then((response){
+          print(response);
           bool check = response.length == 0;
           if (check){
             if (checkDate == 1){
+              print("get inside");
               setState(() {
                 cardList.add(AnswerItem(name: name,time: newtime,));
                 currentPage = cardList.length.toDouble() - 1.0;

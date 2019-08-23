@@ -32,40 +32,23 @@ class _ChildPieCharWidgetState extends State<ChildPieChartWidget> {
       // get the uniqueId
       String tableName = response[0]["uniqueId"];
       print(tableName);
-      var data = db.queryAllRows(tableName);
-      data.then((response){
-        List list = new List();
-        for (var i in response){
-          print(i);
-          String datetime = i["createyear"].toString() +":"+i["createmonth"].toString()+":"+i["createdate"].toString();
-          if (list.indexOf(datetime) == -1){
-            list.add(datetime);
-          }
-        }
-        print(list);
 
-        // go over each element in the list
-        for (var i in list){
-          var stringlist = i.split(":");
-          // set yes list
-          var countYes = db.queryRowCountByDateYes(tableName, stringlist[2]);
-          countYes.then((response){
-            setState(() {
-              yes = response.toDouble();
-
-            });
-          });
-
-          // set no list
-          var countNo = db.queryRowCountByDateNo(tableName, stringlist[2]);
-          countNo.then((response){
-            setState(() {
-              no = response.toDouble();
-            });
-          });
-        }
-
+      DateTime now = DateTime.now();
+      var countYes = db.queryRowCountByDateYes(tableName, now.year.toString(),now.month.toString(),now.day.toString());
+      countYes.then((response){
+        setState(() {
+          yes = response.toDouble();
+        });
       });
+
+      // set no list
+      var countNo = db.queryRowCountByDateNo(tableName, now.year.toString(),now.month.toString(),now.day.toString());
+      countNo.then((response){
+        setState(() {
+          no = response.toDouble();
+        });
+      });
+
     });
   }
 

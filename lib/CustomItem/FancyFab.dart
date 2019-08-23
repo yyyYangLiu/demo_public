@@ -211,7 +211,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
 
       dbH.then((response){
         String uniqueId = response[0]["uniqueId"];
-        var dbC = cdbHelper.checkTime(newtime, uniqueId);
+        var dbC = cdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
         dbC.then((response){
           bool check = response.length == 0;
           var uniqueNum = name+newtime;

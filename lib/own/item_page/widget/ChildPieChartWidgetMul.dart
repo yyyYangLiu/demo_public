@@ -1,30 +1,60 @@
 
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pie_chart/pie_chart.dart';
 
-class ChildOnTimePieChartWidget extends StatefulWidget {
+class ChildPieChartWidgetMul extends StatefulWidget{
   String name;
-  ChildOnTimePieChartWidget({this.name});
+  ChildPieChartWidgetMul({this.name});
+
   @override
-  _ChildOnTimePieChartWidgetState createState() => _ChildOnTimePieChartWidgetState();
+  _ChildPieChartWidgetMulState createState() => _ChildPieChartWidgetMulState();
 }
 
-class _ChildOnTimePieChartWidgetState extends State<ChildOnTimePieChartWidget> {
+class _ChildPieChartWidgetMulState extends State<ChildPieChartWidgetMul> {
   final searchdb = DatabaseHelper.instance;
   final db = CustomDatabaseHelper.instance;
 
-  double onTime;
-  double notonTime;
+  List answerList = new List();
+
+  Map<String, double> dataMap = new Map();
+
 
 
   @override
   void initState() {
-    loadingData();
+    _readFile();
     super.initState();
   }
+
+  _readDatabase() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path;
+    final file = await File('$path/${widget.name}.txt');
+    String contents = await file.readAsString();
+    return contents;
+  }
+
+  // for init value in the card
+  _readFile() async {
+    String contents = await _readDatabase();
+    if (mounted){
+      setState(() {
+        // get answerList
+        List<dynamic> dList = jsonDecode(contents)["answer"];
+        print("touch create answerList");
+        answerList = dList.map((item) => item.toString()).toList();
+        print(answerList);
+      });
+    }
+
+  }
+
   void loadingData () {
     // find the uniqueId by name
     var getUniqueId = searchdb.getData(widget.name);
@@ -33,42 +63,34 @@ class _ChildOnTimePieChartWidgetState extends State<ChildOnTimePieChartWidget> {
       String tableName = response[0]["uniqueId"];
       print(tableName);
       DateTime now = DateTime.now();
-      var data = db.getTodayValues(tableName,now.year.toString(),now.month.toString(),now.day.toString());
-      data.then((response){
-        onTime = 0;
-        notonTime = 0;
-        for (var i in response){
-          String createtime = i["createtime"];
-          String answertime = i["answertime"];
-          if (createtime == answertime){
-            // check if the state still exists
+      var allList = db.queryRowCountByDate(tableName, now.day.toString());
+      allList.then((allresponse){
+        for (var i in answerList){
+          var data = db.queryRowCountByDateValue(tableName,now.day.toString(),i);
+          data.then((response){
             if (mounted){
               setState(() {
-                onTime ++;
+                print("touch in this one");
+                double number = response.toDouble();
+                if (dataMap.length != answerList.length){
+                  dataMap.putIfAbsent(i, () => number);
+                }
               });
             }
-
-          }else{
-            // check if the state still exists
-            if (mounted){
-              setState(() {
-                notonTime ++;
-              });
-            }
-
-          }
+          });
         }
       });
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    if (onTime != null && notonTime != null){
-      Map<String, double> dataMap = new Map();
-      dataMap.putIfAbsent("On Time", () => onTime);
-      dataMap.putIfAbsent("Not on Time", () => notonTime);
-
+    if (dataMap.length == 0){
+      loadingData();
+    }
+    if (dataMap.length != 0){
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: RawMaterialButton(
@@ -99,5 +121,6 @@ class _ChildOnTimePieChartWidgetState extends State<ChildOnTimePieChartWidget> {
     }else{
       return Container();
     }
+
   }
 }

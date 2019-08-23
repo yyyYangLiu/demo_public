@@ -254,7 +254,7 @@ class _MulAnswerState extends State<MulAnswer> with TickerProviderStateMixin{
 
   Widget MulAnswerItem (text){
     RandomColor rdColor = RandomColor();
-    Color _color = rdColor.randomColor();
+    // Color _color = rdColor.randomColor();
 
     // define uniqueId
     String tableName;
@@ -288,7 +288,7 @@ class _MulAnswerState extends State<MulAnswer> with TickerProviderStateMixin{
           });
         },
         elevation: 2.0,
-        fillColor: _color,
+        fillColor: Colors.red,
         constraints: BoxConstraints(minHeight: 70,minWidth: 100),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0)
@@ -311,6 +311,7 @@ class _MulAnswerState extends State<MulAnswer> with TickerProviderStateMixin{
               opacity: isSelected ? 0.0 : 1.0,
               duration: Duration(milliseconds: 300),
               child: ListView(
+                physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 children: widget.answerList.map((text) => MulAnswerItem(text)).toList(),
               ),
@@ -327,7 +328,7 @@ class _MulAnswerState extends State<MulAnswer> with TickerProviderStateMixin{
                     height: 70,
                     width: isSelected ? 250 : 0,
                     child: Center(
-                      child: Text(selectedString,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                      child: Text(selectedString,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 30.0),),
                     ),
                   ),
                 ),
