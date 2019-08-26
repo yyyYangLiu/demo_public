@@ -148,7 +148,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
                 }
               },
               tooltip: 'Add',
-              child: Text(randomString),
+              child: Icon(Icons.add),
             ),
           )
         ],
@@ -350,12 +350,12 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Transform(
-            transform: Matrix4.translationValues(0.0, _translateButton.value*3.0, 0.0),
+            transform: Matrix4.translationValues(0.0, _translateButton.value*2.0, 0.0),
             child: answer(),
           ),
-          Transform(
-              transform: Matrix4.translationValues(0.0, _translateButton.value * 2.0, 0.0),
-              child: inbox()),
+//          Transform(
+//              transform: Matrix4.translationValues(0.0, _translateButton.value * 2.0, 0.0),
+//              child: inbox()),
           Transform(
               transform: Matrix4.translationValues(0.0, _translateButton.value , 0.0),
               child: add(widget.tabController.index)),

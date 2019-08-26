@@ -43,15 +43,19 @@ class _ChildOnTimeLineChartWidgetState extends State<ChildOnTimeLineChartWidget>
           String createtime = i["createtime"];
           String answertime = i["answertime"];
           if (createtime == answertime){
-            setState(() {
-              onTime ++;
-              onTimePer = onTime / response.length;
-            });
+            if (mounted) {
+              setState(() {
+                onTime ++;
+                onTimePer = onTime / response.length;
+              });
+            }
           }else{
-            setState(() {
-              notonTime ++;
-              notonTimePer = notonTime / response.length;
-            });
+            if (mounted) {
+              setState(() {
+                notonTime ++;
+                notonTimePer = notonTime / response.length;
+              });
+            }
           }
         }
       });

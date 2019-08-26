@@ -11,6 +11,7 @@ import 'package:demo/own/item_page/widget/ChildPieCharWidget.dart';
 import 'package:demo/own/item_page/widget/ChildPieChartWidgetMul.dart';
 import 'package:demo/own/item_page/widget/ChildTimeListWidget.dart';
 import 'package:demo/own/item_page/widget/HeaderWidget.dart';
+import 'package:demo/own/item_page/widget/ShowTime.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -58,6 +59,9 @@ class _ItemPageState extends State<ItemPage> {
         backgroundColor: Colors.red,
         brightness: Brightness.light,
         title: Text(widget.name, style: TextStyle(color: Colors.white),),
+        actions: <Widget>[
+          ShowTime(name: widget.name,),
+        ],
       ),
       body: NestedScrollView(
           physics: BouncingScrollPhysics(),
@@ -103,3 +107,4 @@ class MyBehavior extends ScrollBehavior {
     return child;
   }
 }
+

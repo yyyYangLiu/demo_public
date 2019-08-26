@@ -36,17 +36,21 @@ class _ChildPieCharWidgetState extends State<ChildPieChartWidget> {
       DateTime now = DateTime.now();
       var countYes = db.queryRowCountByDateYes(tableName, now.year.toString(),now.month.toString(),now.day.toString());
       countYes.then((response){
-        setState(() {
-          yes = response.toDouble();
-        });
+        if (mounted){
+          setState(() {
+            yes = response.toDouble();
+          });
+        }
       });
 
       // set no list
       var countNo = db.queryRowCountByDateNo(tableName, now.year.toString(),now.month.toString(),now.day.toString());
       countNo.then((response){
-        setState(() {
-          no = response.toDouble();
-        });
+        if (mounted){
+          setState(() {
+            no = response.toDouble();
+          });
+        }
       });
 
     });

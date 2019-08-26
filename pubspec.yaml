@@ -38,6 +38,7 @@ dependencies:
   flutter_spinkit: ^2.1.0
   bezier_chart: ^1.0.14
   pie_chart: ^1.2.0
+  location: ^2.3.5
 
 dev_dependencies:
   flutter_test:

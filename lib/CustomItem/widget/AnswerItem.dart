@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_color/random_color.dart';
 
@@ -381,30 +382,36 @@ class _EntAnswerState extends State<EntAnswer> with TickerProviderStateMixin{
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  keyboardType: TextInputType.number,
                   controller: enterController,
                   autocorrect: true,
+                  inputFormatters: <TextInputFormatter>[
+                    WhitelistingTextInputFormatter.digitsOnly
+                  ],
                   onSubmitted: (text){
-                    print("touch no $text");
-                    DateTime now = DateTime.now();
-                    String currenttime = now.hour.toString() +":" + now.minute.toString();
-                    Map<String, dynamic> row = new Map<String,dynamic>();
-                    row["createyear"] = now.year.toString();
-                    row["createmonth"] = now.month.toString();
-                    row["createdate"] = now.day.toString();
-                    row["createweek"] = now.weekday.toString();
-                    row["createtime"] = widget.time;
-                    row["answertime"] = currenttime;
-                    row["answer"] = text;
-                    db.insert(row, tableName);
-                    setState(() {
-                      resultString = text;
-                      isSelected = true;
-                    });
+                    if (text != ""){
+                      print("touch no $text");
+                      DateTime now = DateTime.now();
+                      String currenttime = now.hour.toString() +":" + now.minute.toString();
+                      Map<String, dynamic> row = new Map<String,dynamic>();
+                      row["createyear"] = now.year.toString();
+                      row["createmonth"] = now.month.toString();
+                      row["createdate"] = now.day.toString();
+                      row["createweek"] = now.weekday.toString();
+                      row["createtime"] = widget.time;
+                      row["answertime"] = currenttime;
+                      row["answer"] = text;
+                      db.insert(row, tableName);
+                      setState(() {
+                        resultString = text;
+                        isSelected = true;
+                      });
+                    }
                   },
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: "Name : ",
-                      hintText: 'Create a name'),
+                      labelText: "Number : ",
+                      hintText: 'Enter a digit'),
                   style: TextStyle(color: Colors.blue),
                 ),
               ),

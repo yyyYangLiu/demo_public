@@ -93,6 +93,7 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
   // for init value in the card
   _readFile() async {
     String contents = await _readDatabase();
+    print(contents);
     setState(() {
       // get Type
       answerType = jsonDecode(contents)["type"];
@@ -213,6 +214,7 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                       width: 76,
                       child: Row(
                         children: <Widget>[
+                          // set Remainder
                           GestureDetector(
                               onTap: (){
                                 setState(() {
@@ -226,6 +228,7 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                                 });
                               },
                               child: Icon(Icons.alarm,color: isSelectRemainder ? Colors.blue : Colors.grey,)),
+                          // show the total value
                           RawMaterialButton(
                             onPressed: (){},
                             fillColor: Colors.red,

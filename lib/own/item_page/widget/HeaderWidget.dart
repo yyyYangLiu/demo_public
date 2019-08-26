@@ -40,7 +40,10 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       );
     }else if (widget.type == "ent"){
       return SliverToBoxAdapter(
-        child: Container(),
+        child: Container(
+          height: 400,
+          child: EnterChart(name: widget.name,),
+        ),
       );
     }else{
       return SliverToBoxAdapter(child: Container());
@@ -208,6 +211,7 @@ class _SampleChartState extends State<SampleChart> {
             verticalIndicatorStrokeWidth: 2.0,
             verticalIndicatorColor: Colors.grey,
             showVerticalIndicator: true,
+            snap: false,
             verticalIndicatorFixedPosition: false,
             backgroundColor: Colors.red,
             footerHeight: 30.0,
@@ -388,6 +392,7 @@ class _MulSampleChartState extends State<MulSampleChart> {
             verticalIndicatorStrokeWidth: 2.0,
             verticalIndicatorColor: Colors.white,
             showVerticalIndicator: true,
+            snap: false,
             verticalIndicatorFixedPosition: false,
             backgroundColor: Colors.red,
             footerHeight: 30.0,
@@ -398,4 +403,94 @@ class _MulSampleChartState extends State<MulSampleChart> {
       return Container();
     }
   }
+}
+
+class EnterChart extends StatefulWidget{
+  String name;
+  EnterChart({this.name});
+
+  @override
+  _EnterChartState createState() => _EnterChartState();
+}
+
+class _EnterChartState extends State<EnterChart> {
+  final searchdb = DatabaseHelper.instance;
+  final db = CustomDatabaseHelper.instance;
+
+  List<String> xAxis = [];
+  List<String> answer = [];
+  List<double> indexlist = [];
+
+  void loadingData () {
+    // find the uniqueId by name
+    var getUniqueId = searchdb.getData(widget.name);
+    getUniqueId.then((response){
+      // get the uniqueId
+      String tableName = response[0]["uniqueId"];
+      DateTime now = DateTime.now();
+      var data = db.getTodayValues(tableName, now.year.toString(), now.month.toString(), now.day.toString());
+      data.then((response){
+        var sortedresponse = response.toList()..sort((a,b) => int.parse(a["createtime"].replaceAll(RegExp(':'), '')).compareTo(int.parse(b["createtime"].replaceAll(RegExp(':'),''))));
+        double index = 0;
+        for (var i in sortedresponse){
+          if (mounted){
+            setState(() {
+              print("inside");
+              print(i);
+              print(i["createtime"]);
+              print(i["answer"]);
+              xAxis.add(i["createtime"]);
+              indexlist.add(index);
+              answer.add(i["answer"]);
+            });
+          }
+          index ++;
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (xAxis.length == 0 && answer.length == 0){
+      loadingData();
+    }
+    print(xAxis);
+    print(answer);
+    if (xAxis.length != 0 && answer.length != 0){
+
+      return Padding(
+        padding: const EdgeInsets.only(top: 60.0),
+        child: BezierChart(
+          footerValueBuilder: (double){
+            return xAxis[double.toInt()];
+          },
+          xAxisCustomValues: indexlist,
+          bezierChartScale: BezierChartScale.CUSTOM,
+          series: [
+            BezierLine(
+              label: "",
+              data: answer.map((item) => DataPoint<double>(value: double.parse(item), xAxis: answer.indexOf(item).toDouble())).toList()
+            )
+          ],
+          config: BezierChartConfig(
+            physics: BouncingScrollPhysics(),
+            verticalIndicatorStrokeWidth: 2.0,
+            verticalIndicatorColor: Colors.white,
+            showVerticalIndicator: true,
+            verticalIndicatorFixedPosition: false,
+            contentWidth: MediaQuery.of(context).size.width *1.2,
+            snap:false,
+            backgroundColor: Colors.red,
+            footerHeight: 30.0,
+          ),
+        ),
+      );
+    }else{
+      return Container();
+    }
+
+  }
+
+
 }

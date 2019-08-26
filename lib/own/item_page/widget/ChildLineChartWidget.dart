@@ -40,27 +40,29 @@ class _ChildOnTimeLineChartWidgetState extends State<ChildLineChartWidget> {
       total.then((totalcount){
         var countYes = db.queryRowCountByDateYes(tableName, now.year.toString(),now.month.toString(),now.day.toString());
         countYes.then((response){
-          print("yes");
-          print(response);
-          setState(() {
-            yes = response.toDouble();
-            if (totalcount.length != 0){
-              yesPer = yes / totalcount.length.toDouble() ;
-            }
 
-          });
+          if (mounted) {
+            setState(() {
+              yes = response.toDouble();
+              if (totalcount.length != 0){
+                yesPer = yes / totalcount.length.toDouble() ;
+              }
+            });
+          }
         });
 
         // set no list
         var countNo = db.queryRowCountByDateNo(tableName, now.year.toString(),now.month.toString(),now.day.toString());
         countNo.then((response){
-          setState(() {
-            no = response.toDouble();
-            if (totalcount.length != 0){
-              noPer = no /totalcount.length.toDouble() ;
-            }
+          if (mounted) {
+            setState(() {
+              no = response.toDouble();
+              if (totalcount.length != 0){
+                noPer = no /totalcount.length.toDouble() ;
+              }
 
-          });
+            });
+          }
         });
       });
     });
