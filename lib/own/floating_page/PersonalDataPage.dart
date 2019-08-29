@@ -4,6 +4,7 @@ import 'package:demo/dataBase/CustomDatabaseHelper.dart';
 import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
+import 'package:demo/own/floating_page/widget/CreateLocation.dart';
 import 'package:demo/own/floating_page/widget/CreateTemplate.dart';
 import 'package:demo/own/floating_page/widget/NewCustomDayTemplateSelector.dart';
 import 'package:demo/own/floating_page/widget/TypeBar.dart';
@@ -31,6 +32,7 @@ class PersonalDataPageState extends State<PersonalDataPage> {
   List<DayTemplateSelector> daytemplateSelector = [];
   String selectType = "";
   bool isSelectedM = false;
+  bool isSelectedMa = false;
 
   @override
   void initState() {
@@ -178,12 +180,20 @@ class PersonalDataPageState extends State<PersonalDataPage> {
                 setState(() {
                   if (text == "mul"){
                     isSelectedM = true;
+                    isSelectedMa = false;
+                  }else if (text == "map") {
+                    isSelectedMa = true;
+                    isSelectedM = false;
+                    print("get into map");
                   }else{
                     isSelectedM = false;
+                    isSelectedMa = false;
                   }
                 });
 
               },),
+              // Create map location
+              CreateLocation(isMap: isSelectedMa),
               // Create Answers
               CreateAnswer(isMul: isSelectedM, answerslist: answers,),
               // New Day Selector

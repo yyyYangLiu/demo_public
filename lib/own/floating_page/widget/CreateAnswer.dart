@@ -82,7 +82,6 @@ class _CreateAnswerState extends State<CreateAnswer>{
   }
 }
 
-
 class Answer extends StatefulWidget{
   int index;
   bool isExist;

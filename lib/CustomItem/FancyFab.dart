@@ -9,8 +9,11 @@ import 'package:demo/dataBase/DatabaseHelper.dart';
 import 'package:demo/own/floating_page/PersonalDataPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
+
+import 'package:google_maps_webservice/places.dart';
 
 class FancyFab extends StatefulWidget{
   final Function onPressed;
@@ -128,6 +131,37 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     );
   }
 
+  readData() async {
+    Prediction result = await PlacesAutocomplete.show(
+        context: context,
+        apiKey: 'AIzaSyAw1xtR8Hm3ZEnlIV9xLbSNNuK1o4CrQ8s',
+        mode: Mode.overlay,
+        language: "en",
+        logo: Container(height: 0,),
+        onError: (e){
+          print(e.errorMessage);
+        },
+        components: [
+          Component(Component.country, "ca")
+        ]);
+    displayPrediction(result);
+  }
+
+  Future<Null> displayPrediction(Prediction p) async {
+    GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: 'AIzaSyAw1xtR8Hm3ZEnlIV9xLbSNNuK1o4CrQ8s');
+    if (p != null) {
+      PlacesDetailsResponse detail =
+      await _places.getDetailsByPlaceId(p.placeId);
+
+      double lat = detail.result.geometry.location.lat;
+      double lng = detail.result.geometry.location.lng;
+
+      print(p.description);
+      print(lat);
+      print(lng);
+    }
+  }
+
   Widget add(index){
     String randomString = randomAlpha(30);
     return new Container(
@@ -142,9 +176,7 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
                 if (index == 1){
                   _showDialog();
                 }else{
-                  setState(() {
-                    randomString = randomAlpha(30);
-                  });
+                  readData();
                 }
               },
               tooltip: 'Add',
