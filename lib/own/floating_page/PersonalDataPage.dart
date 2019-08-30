@@ -6,6 +6,7 @@ import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
 import 'package:demo/own/floating_page/widget/CreateLocation.dart';
 import 'package:demo/own/floating_page/widget/CreateTemplate.dart';
+import 'package:demo/own/floating_page/widget/CustomDaySelector.dart';
 import 'package:demo/own/floating_page/widget/NewCustomDayTemplateSelector.dart';
 import 'package:demo/own/floating_page/widget/TypeBar.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,6 +35,8 @@ class PersonalDataPageState extends State<PersonalDataPage> {
   bool isSelectedM = false;
   bool isSelectedMa = false;
 
+  List<LocationItem> locations = [];
+
   @override
   void initState() {
     for (int i=0; i <= 6; i++){
@@ -45,7 +48,15 @@ class PersonalDataPageState extends State<PersonalDataPage> {
   int day = 0;
   int counts = 0;
 
+  test() async {
+    print("test");
+    print(locations.map((item) => item.isExist).toList());
+    print(locations.map((item) => item.location).toList());
+    print(locations.map((item) => item.lat).toList());
+    print(locations.map((item) => item.lng).toList());
+  }
   _saveToDataBase() async {
+      test();
       // name
       print(widget.name);
       // type
@@ -193,13 +204,13 @@ class PersonalDataPageState extends State<PersonalDataPage> {
 
               },),
               // Create map location
-              CreateLocation(isMap: isSelectedMa),
+              CreateLocation(isMap: isSelectedMa, locationlist: locations),
               // Create Answers
               CreateAnswer(isMul: isSelectedM, answerslist: answers,),
               // New Day Selector
               NewCustomDayTemplateSelector(list: daytemplateSelector,),
               // Template Creator
-              CreateTemplate(templates: templates,),
+              CreateTemplate(templates: templates, isMap: isSelectedMa),
               // save area
               Container(
                 color: Colors.transparent,

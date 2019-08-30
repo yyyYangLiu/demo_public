@@ -8,6 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 
+class MapTimeItem{
+  String start;
+  String end;
+  MapTimeItem({this.start,this.end});
+}
+
 class OwnDataItem extends StatefulWidget{
   String name;
   Function delete;
@@ -32,6 +38,10 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
   List<String> dayList = new List();
   // (for the day widget)
   List<int> listcount = new List();
+  List<List<dynamic>> listTime = new List();
+
+  // (for the map widget)
+  List<MapTimeItem> maptimelist = new List();
 
   // using to the count buttom (in this page)
   int totalcount = 0;
@@ -112,7 +122,33 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
       }
       // get the totalcount value
       listcount.forEach((item) => totalcount += item);
-
+      // get details time list
+      if (answerType == "map"){
+        // set the map time list
+        List timelist = new List();
+        for (var index in templateSelectList){
+          timelist.add(switchNumberlist.where((item) => item["index"].toString() == index.toString()).toList()[0]["time"]);
+        }
+        for (var i in timelist){
+          var first = i[0].substring(10,15);
+          var second = i[1].substring(10,15);
+          maptimelist.add(MapTimeItem(start: first,end: second));
+        }
+      }else{
+        // set the time list
+        List timelist = new List();
+        for (var index in templateSelectList){
+          timelist.add(switchNumberlist.where((item) => item["index"].toString() == index.toString()).toList()[0]["time"]);
+        }
+        for (var i in timelist){
+          List child = [];
+          for (var j in i){
+            String switchj = j.substring(10,15);
+            child.add(switchj);
+          }
+          listTime.add(child);
+        }
+      }
     });
   }
 
@@ -224,7 +260,6 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                                   }else{
                                     flutterLocalNotificationsPlugin.cancelAll();
                                   }
-
                                 });
                               },
                               child: Icon(Icons.alarm,color: isSelectRemainder ? Colors.blue : Colors.grey,)),
@@ -241,17 +276,6 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                       ),
                     ),
                   ),
-//                  Align(
-//                    alignment: Alignment.topRight,
-//                    child: RawMaterialButton(
-//                      onPressed: (){},
-//                      fillColor: Colors.red,
-//                      constraints: BoxConstraints(minHeight: 30,minWidth: 30),
-//                      shape: RoundedRectangleBorder(
-//                        borderRadius: BorderRadius.circular(30.0),
-//                      ),
-//                      child: Text(totalcount.toString(),style: TextStyle(color: Colors.white),),),
-//                  ),
                   // Close Button
                   Align(
                     alignment: Alignment.topLeft,
@@ -287,7 +311,7 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                             child: Text(widget.name,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 30.0),)),
                       ),
                       Container(
-                        child: dayBar(dayList: dayList,listcount: listcount,),
+                        child: dayBar(dayList: dayList,listcount: listcount, listtime: listTime, type: answerType,maptimelist: maptimelist,),
                       ),
                     ],
                   ),
@@ -304,26 +328,61 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
 class dayBar extends StatelessWidget{
   List<String> dayList;
   List<int> listcount;
-  dayBar({this.dayList,this.listcount});
+  List<List<dynamic>> listtime;
+  String type;
+  List<MapTimeItem> maptimelist;
+  dayBar({this.dayList,this.listcount,this.listtime,this.type,this.maptimelist});
 
   @override
   Widget build(BuildContext context) {
 
-    List<Widget> DayList = new List();
-    for (int i = 0; i < dayList.length; i++){
-      DayList.add(_Day(label: dayList[i],count: listcount[i]));
+    if (type == "map"){
+      List<Widget> MapDayList = new List();
+      for (int i =0; i < dayList.length; i++){
+        MapDayList.add(_MapDay(label: dayList[i],mtItem: maptimelist[i],));
+      }
+      return Padding(
+        padding: EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: MapDayList,
+          ),
+        ),
+      );
+    }else if (type == "yes"){
+      List<Widget> DayList = new List();
+      for (int i = 0; i < dayList.length; i++){
+        DayList.add(_Day(label: dayList[i],count: listcount[i]));
+      }
+      return Padding(
+        padding: EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: DayList,
+          ),
+        ),
+      );
+    }else{
+      List<Widget> DayList = new List();
+      for (int i = 0; i < dayList.length;i++){
+        DayList.add(_Day2(label: dayList[i],list: listtime[i],));
+      }
+      return Padding(
+        padding: EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: DayList,
+          ),
+        ),
+      );
     }
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: DayList,
-        ),
-      ),
-    );
   }
 }
 
@@ -366,6 +425,56 @@ class _Day extends StatelessWidget {
   }
 }
 
+class _Day2 extends StatelessWidget{
+  String label;
+  List<dynamic> list;
+  _Day2({this.label,this.list});
+
+  Widget TextItem(i){
+    return Text(i, style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> DayTime = new List();
+    for (var i in list){
+      DayTime.add(TextItem(i));
+    }
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Text(label,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: DayTime,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+}
+
+class _MapDay extends StatelessWidget{
+  final String label;
+  final MapTimeItem mtItem;
+  _MapDay({this.label,this.mtItem});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Text(label,style: TextStyle(color: Colors.black, fontWeight:  FontWeight.bold)),
+          Text(mtItem.start, style:TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+          Text(mtItem.end, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),)
+        ],
+      ),
+    );
+  }
+}
 
 class DrawCircle extends CustomPainter {
   Paint _paint;

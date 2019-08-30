@@ -220,6 +220,9 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     String contents = await file.readAsString();
 
+    //get type
+    String answerType = jsonDecode(contents)["type"];
+
     // get day
     List<dynamic> switchdaylist = jsonDecode(contents)["day"];
     List<String> dayList = switchdaylist.map((item) => item.toString()).toList();
@@ -227,37 +230,39 @@ class _FancyFabState extends State<FancyFab> with SingleTickerProviderStateMixin
     List<dynamic> switchNumberlist = jsonDecode(contents)["template"];
     List<dynamic> templateSelectList = jsonDecode(contents)["templateSelect"];
 
-    var now = new DateTime.now();
-    String todayWeekday = labels[now.weekday-1];
-    int indexforTemplateSelect = dayList.indexOf(todayWeekday);
-    int indexforTempalte = templateSelectList[indexforTemplateSelect];
-    var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
-    for (var timeString in alist){
-      String newtime = timeString.substring(10,15);
-      var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
-      // check time if before
-      int checkDate = now.compareTo(temptime);
+    if (answerType != "map"){
+      var now = new DateTime.now();
+      String todayWeekday = labels[now.weekday-1];
+      int indexforTemplateSelect = dayList.indexOf(todayWeekday);
+      int indexforTempalte = templateSelectList[indexforTemplateSelect];
+      var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
+      for (var timeString in alist){
+        String newtime = timeString.substring(10,15);
+        var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
+        // check time if before
+        int checkDate = now.compareTo(temptime);
 
 
-      var dbH = dbHelper.getData(name);
+        var dbH = dbHelper.getData(name);
 
-      dbH.then((response){
-        String uniqueId = response[0]["uniqueId"];
-        var dbC = cdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
-        dbC.then((response){
-          bool check = response.length == 0;
-          var uniqueNum = name+newtime;
-          if (check){
-            if (checkDate == 1){
-              if (timeList.indexOf(uniqueNum) == -1){
-                timeList.add(uniqueNum);
+        dbH.then((response){
+          String uniqueId = response[0]["uniqueId"];
+          var dbC = cdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
+          dbC.then((response){
+            bool check = response.length == 0;
+            var uniqueNum = name+newtime;
+            if (check){
+              if (checkDate == 1){
+                if (timeList.indexOf(uniqueNum) == -1){
+                  timeList.add(uniqueNum);
+                }
               }
+            }else{
+              timeList.remove(uniqueNum);
             }
-          }else{
-            timeList.remove(uniqueNum);
-          }
+          });
         });
-      });
+      }
     }
   }
 

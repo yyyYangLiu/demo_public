@@ -61,6 +61,9 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
     final labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     String contents = await file.readAsString();
 
+    // get type
+    String answerType = jsonDecode(contents)["type"];
+
     // get day
     List<dynamic> switchdaylist = jsonDecode(contents)["day"];
     List<String> dayList = switchdaylist.map((item) => item.toString()).toList();
@@ -68,43 +71,45 @@ class _CustomDialogAnswerPageState extends State<CustomDialogAnswerPage> {
     List<dynamic> switchNumberlist = jsonDecode(contents)["template"];
     List<dynamic> templateSelectList = jsonDecode(contents)["templateSelect"];
 
-    var now = new DateTime.now();
-    String todayWeekday = labels[now.weekday-1];
-    int indexforTemplateSelect = dayList.indexOf(todayWeekday);
-    int indexforTempalte = templateSelectList[indexforTemplateSelect];
-    var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
-    for (var timeString in alist){
-      String newtime = timeString.substring(10,15);
-      print(newtime);
-      var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
-      // check time if before
-      int checkDate = now.compareTo(temptime);
-      print(checkDate);
-      print(name);
-      var dbH = dbHelper.getData(name);
-      dbH.then((response){
-        String uniqueId = response[0]["uniqueId"];
-        var dbC = customdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
-        dbC.then((response){
-          print(response);
-          bool check = response.length == 0;
-          if (check){
-            if (checkDate == 1){
-              print("get inside");
-              setState(() {
-                cardList.add(AnswerItem(name: name,time: newtime,));
-                currentPage = cardList.length.toDouble() - 1.0;
-                Future.delayed(Duration(milliseconds: 100), () {
-                  print("jump");
-                  print(cardList.length - 1);
-                  controller.jumpToPage(cardList.length - 1);
+    if (answerType != "map"){
+      var now = new DateTime.now();
+      String todayWeekday = labels[now.weekday-1];
+      int indexforTemplateSelect = dayList.indexOf(todayWeekday);
+      int indexforTempalte = templateSelectList[indexforTemplateSelect];
+      var alist = switchNumberlist.where((item) => item["index"] == indexforTempalte).toList()[0]["time"];
+      for (var timeString in alist){
+        String newtime = timeString.substring(10,15);
+        print(newtime);
+        var temptime = DateTime(now.year,now.month,now.day,int.parse(newtime.split(":")[0]),int.parse(newtime.split(":")[1]));
+        // check time if before
+        int checkDate = now.compareTo(temptime);
+        print(checkDate);
+        print(name);
+        var dbH = dbHelper.getData(name);
+        dbH.then((response){
+          String uniqueId = response[0]["uniqueId"];
+          var dbC = customdbHelper.checkTime(uniqueId,now.year.toString(),now.month.toString(),now.day.toString(),newtime);
+          dbC.then((response){
+            print(response);
+            bool check = response.length == 0;
+            if (check){
+              if (checkDate == 1){
+                print("get inside");
+                setState(() {
+                  cardList.add(AnswerItem(name: name,time: newtime,));
+                  currentPage = cardList.length.toDouble() - 1.0;
+                  Future.delayed(Duration(milliseconds: 100), () {
+                    print("jump");
+                    print(cardList.length - 1);
+                    controller.jumpToPage(cardList.length - 1);
+                  });
                 });
-              });
+              }
             }
-          }
-        });
+          });
 
-      });
+        });
+      }
     }
   }
 

@@ -6,18 +6,18 @@ import 'package:google_maps_webservice/places.dart';
 
 class CreateLocation extends StatefulWidget{
   bool isMap;
-  CreateLocation({this.isMap});
+  List locationlist;
+  CreateLocation({this.isMap,this.locationlist});
 
   @override
   _CreateLocationState createState() => _CreateLocationState();
 }
 
 class _CreateLocationState extends State<CreateLocation> {
-  List locationList = [];
 
-  addLocation(text){
+  addLocation(text,lat,lng){
     setState(() {
-      locationList.add(text);
+      widget.locationlist.add(LocationItem(location: text,lat: lat,lng: lng,isExist: true,));
     });
   }
 
@@ -26,7 +26,7 @@ class _CreateLocationState extends State<CreateLocation> {
     return Visibility(
       visible: widget.isMap,
       child: Container(
-        height: locationList.length != 0 ? 300 : 50,
+        height: widget.locationlist.length != 0 ? 300 : 50,
         child: Stack(
           children: <Widget>[
             Container(
@@ -35,7 +35,7 @@ class _CreateLocationState extends State<CreateLocation> {
                 physics: BouncingScrollPhysics(),
                 children: <Widget>[
                   Row(
-                    children: locationList.map((item) => LocationItem(location: item)).toList(),
+                    children: widget.locationlist,
                   ),
                 ],
               ),
@@ -84,7 +84,7 @@ class _addButtonState extends State<addButton> {
       print(result.description);
       print(lat);
       print(lng);
-      widget.add(result.description);
+      widget.add(result.description,lat,lng);
     }
   }
 
@@ -106,7 +106,10 @@ class _addButtonState extends State<addButton> {
 
 class LocationItem extends StatefulWidget{
   String location;
-  LocationItem({this.location});
+  double lat;
+  double lng;
+  bool isExist;
+  LocationItem({this.location,this.lat,this.lng,this.isExist});
 
   @override
   _LocationItemState createState() => _LocationItemState();
@@ -146,47 +149,52 @@ class _LocationItemState extends State<LocationItem> {
   }
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: RawMaterialButton(
-        onPressed: (){
-          _showDialog();
-        },
-        elevation: 2.0,
-        fillColor: Colors.white,
-        splashColor:  Colors.transparent,
-        constraints: BoxConstraints(minWidth: 50,maxWidth: 200),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(15.0))
-        ),
-        child: Stack(
-          children: <Widget>[
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(location,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0)),
+    return Visibility(
+      visible: widget.isExist,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: RawMaterialButton(
+          onPressed: (){
+            _showDialog();
+          },
+          elevation: 2.0,
+          fillColor: Colors.white,
+          splashColor:  Colors.transparent,
+          constraints: BoxConstraints(minWidth: 50,maxWidth: 200),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15.0))
+          ),
+          child: Stack(
+            children: <Widget>[
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(location,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0)),
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  onTap: () async {
-
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: Container(
-                      color: Colors.red,
-                      child: Icon(Icons.close, color: Colors.white,),),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () async {
+                      setState(() {
+                        widget.isExist = false;
+                      });
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Container(
+                        color: Colors.red,
+                        child: Icon(Icons.close, color: Colors.white,),),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      )
+            ],
+          ),
+        )
+      ),
     );
   }
 }

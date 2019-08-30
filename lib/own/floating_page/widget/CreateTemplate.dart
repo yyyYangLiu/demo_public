@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 class CreateTemplate extends StatefulWidget{
   List<TemplateItem> templates;
-  CreateTemplate({this.templates,});
+  bool isMap;
+  CreateTemplate({this.templates,this.isMap});
 
   @override
   _CreateTemplateState createState() => _CreateTemplateState();
@@ -66,7 +67,7 @@ class _CreateTemplateState extends State<CreateTemplate> {
               ],
             ),
           )
-          
+
         ],
       ),
     );
