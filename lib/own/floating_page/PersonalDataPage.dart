@@ -6,7 +6,6 @@ import 'package:demo/dataBase/StoreModel/OwnDataModel.dart';
 import 'package:demo/own/floating_page/widget/CreateAnswer.dart';
 import 'package:demo/own/floating_page/widget/CreateLocation.dart';
 import 'package:demo/own/floating_page/widget/CreateTemplate.dart';
-import 'package:demo/own/floating_page/widget/CustomDaySelector.dart';
 import 'package:demo/own/floating_page/widget/NewCustomDayTemplateSelector.dart';
 import 'package:demo/own/floating_page/widget/TypeBar.dart';
 import 'package:flutter/cupertino.dart';
@@ -55,6 +54,7 @@ class PersonalDataPageState extends State<PersonalDataPage> {
     print(locations.map((item) => item.lat).toList());
     print(locations.map((item) => item.lng).toList());
   }
+
   _saveToDataBase() async {
       test();
       // name
@@ -64,6 +64,11 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       // answer
       List<Answer> fliteranswers = answers.where((item) => item.isExist).toList();
       print(fliteranswers.map((item) => item.text).toList());
+      // location
+      List<LocationItem> filterlocations = locations.where((item) => item.isExist).toList();
+      print(filterlocations.map((item) => item.location).toList());
+      print(filterlocations.map((item) => item.lat).toList());
+      print(filterlocations.map((item) => item.lng).toList());
       // templates
       List<TemplateItem> filtertemplates = templates.where((item) => item.isExist).toList();
       print(filtertemplates.map((item) => item.time).toList());
@@ -88,7 +93,7 @@ class PersonalDataPageState extends State<PersonalDataPage> {
       List<OwnDataDataBase> outputlist = [];
       final check = await dbHelper.getData(widget.name);
       outputlist.add(OwnDataDataBase(id: check[0]["id"], name: check[0]["name"]));
-
+      // send information to frontpage
       widget.updateMainPage(outputlist);
 
       // inputJson
@@ -98,6 +103,7 @@ class PersonalDataPageState extends State<PersonalDataPage> {
           name: widget.name,
           type: selectType,
           answer: fliteranswers.map((item) => item.text).toList(),
+          locations: filterlocations.map((item) => LocationModel(location: item.location, lat: item.lat, lng: item.lng)).toList(),
           template: templatemodel,
           day: filterdaytemplate.map((item) => labels[item.Dayindex]).toList(),
           templateSelect: filterdaytemplate.map((item) => item.Templateindex).toList()

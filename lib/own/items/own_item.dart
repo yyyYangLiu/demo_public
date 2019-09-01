@@ -351,24 +351,10 @@ class dayBar extends StatelessWidget{
           ),
         ),
       );
-    }else if (type == "yes"){
-      List<Widget> DayList = new List();
-      for (int i = 0; i < dayList.length; i++){
-        DayList.add(_Day(label: dayList[i],count: listcount[i]));
-      }
-      return Padding(
-        padding: EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
-        child: Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: DayList,
-          ),
-        ),
-      );
     }else{
       List<Widget> DayList = new List();
       for (int i = 0; i < dayList.length;i++){
+        // DayList.add(_Day(label: dayList[i], count: listcount[1]));
         DayList.add(_Day2(label: dayList[i],list: listtime[i],));
       }
       return Padding(
@@ -382,7 +368,6 @@ class dayBar extends StatelessWidget{
         ),
       );
     }
-
   }
 }
 

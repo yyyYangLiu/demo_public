@@ -25,6 +25,7 @@ class OwnDataModel{
   String name;
   String type;
   List<String> answer;
+  List<LocationModel> locations;
   List<TemplateModel> template;
   List<String> day;
   List<int> templateSelect;
@@ -33,6 +34,7 @@ class OwnDataModel{
     this.name,
     this.type,
     this.answer,
+    this.locations,
     this.template,
     this.day,
     this.templateSelect,
@@ -42,6 +44,7 @@ class OwnDataModel{
     "name" : name,
     "type" : type,
     "answer" : answer,
+    "locations" : locations.map((item) => item.toJson()).toList(),
     "template" : template.map((item) => item.toJson()).toList(),
     "day" : day,
     "templateSelect" : templateSelect
@@ -58,6 +61,22 @@ class TemplateModel{
   Map<String, dynamic> toJson() =>{
     "index" : index,
     "time" : time.map((item) => item.toString()).toList()
+  };
+
+}
+
+
+class LocationModel{
+  String location;
+  double lat;
+  double lng;
+
+  LocationModel({this.location,this.lat,this.lng});
+
+  Map<String, dynamic> toJson() =>{
+    "location" : location,
+    "lat" : lat,
+    "lng" : lng
   };
 
 }
