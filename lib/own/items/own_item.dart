@@ -1,10 +1,13 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:demo/dataBase/GPSDatabaseHelper.dart';
 import 'package:demo/own/item_page/ItemPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -215,10 +218,31 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
     } catch(e) {}
   }
 
+
+  _setLocation() async{
+    final gpsdb = GPSDatabaseHelper.instance;
+    FlutterBackgroundLocation.startLocationService();
+    FlutterBackgroundLocation.getLocationUpdates((location) {
+      var now = DateTime.now();
+      String time = now.hour.toString()+":"+now.minute.toString();
+      print(now.hour.toString()+":"+now.minute.toString());
+      print(location.latitude.toString() + ","+location.longitude.toString());
+      Map<String, dynamic> row = {
+        "name" : widget.name,
+        "time" : time,
+        "latitude" : location.longitude,
+        "longitude" : location.longitude
+      };
+      gpsdb.insert(row);
+    });
+  }
+
+
+
   bool isSelectRemainder = false;
+  bool isRecordingGps = false;
   @override
   Widget build(BuildContext context) {
-
     return Visibility(
       visible: isExist,
       child: Transform(
@@ -244,6 +268,7 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
               child: Stack(
                 children: <Widget>[
                   // Count Remainder
+                  answerType != "map" ?
                   Align(
                     alignment: Alignment.topRight,
                     child: Container(
@@ -274,6 +299,24 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
                             child: Text(totalcount.toString(),style: TextStyle(color: Colors.white),),),
                         ],
                       ),
+                    ),
+                  ) :
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              isRecordingGps = !isRecordingGps;
+                              if (isRecordingGps){
+                                _setLocation();
+                              }else{
+                                FlutterBackgroundLocation.stopLocationService();
+                              }
+                            });
+                          },
+                          child: Icon(Icons.location_searching,color: isRecordingGps ? Colors.red : Colors.grey,)),
                     ),
                   ),
                   // Close Button

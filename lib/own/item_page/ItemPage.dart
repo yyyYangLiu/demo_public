@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:demo/own/item_page/widget/ChildGPSShowListWidget.dart';
 import 'package:demo/own/item_page/widget/ChildLineChartWidget.dart';
 import 'package:demo/own/item_page/widget/ChildLineChartWidgetMul.dart';
 import 'package:demo/own/item_page/widget/ChildOnTimeLineChartWidget.dart';
@@ -84,7 +85,7 @@ class _ItemPageState extends State<ItemPage> {
                   scrollDirection: Axis.vertical,
                   physics: AlwaysScrollableScrollPhysics(),
                   children: <Widget>[
-                    ChildTimeListWidget(name: widget.name),
+                    type == "map" ? ChildGPSShowListWidget(name: widget.name) : ChildTimeListWidget(name: widget.name),
                     type == "yes" ? ChildLineChartWidget(name: widget.name) : Container() ,
                     type == "yes" ? ChildPieChartWidget(name: widget.name,) : Container() ,
                     type == "yes" ? ChildOnTimeLineChartWidget(name: widget.name) : Container() ,

@@ -15,6 +15,7 @@ class _DataPageState extends State<DataPage> {
   String latitude = "";
   String longitude = "";
 
+
   readData() async {
     Prediction result = await PlacesAutocomplete.show(
         context: context,
@@ -40,7 +41,6 @@ class _DataPageState extends State<DataPage> {
       }
 
     });
-
 
     return Scaffold(
 
