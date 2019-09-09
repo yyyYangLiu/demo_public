@@ -61,9 +61,14 @@ class GPSDatabaseHelper{
     return await db.query(table);
   }
 
-  Future<List<Map<String, dynamic>>> getData(String name) async {
+  Future<List<Map<String, dynamic>>> getData(String time) async {
     Database db = await instance.database;
-    return await db.query(table, where: "name = ?",whereArgs: [name]);
+    return await db.query(table, where: "time = ?",whereArgs: [time]);
+  }
+
+  void deleteAll() async {
+    Database db =await instance.database;
+    db.rawDelete("DELETE FROM $table");
   }
 
 }

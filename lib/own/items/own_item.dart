@@ -221,19 +221,26 @@ class OwnDataItemState extends State<OwnDataItem> with SingleTickerProviderState
 
   _setLocation() async{
     final gpsdb = GPSDatabaseHelper.instance;
+    gpsdb.deleteAll();
     FlutterBackgroundLocation.startLocationService();
     FlutterBackgroundLocation.getLocationUpdates((location) {
       var now = DateTime.now();
       String time = now.hour.toString()+":"+now.minute.toString();
       print(now.hour.toString()+":"+now.minute.toString());
       print(location.latitude.toString() + ","+location.longitude.toString());
-      Map<String, dynamic> row = {
-        "name" : widget.name,
-        "time" : time,
-        "latitude" : location.longitude,
-        "longitude" : location.longitude
-      };
-      gpsdb.insert(row);
+      var check = gpsdb.getData(time);
+      check.then((response){
+        print(response);
+        if (response.length == 0){
+          Map<String, dynamic> row = {
+            "name" : widget.name,
+            "time" : time,
+            "latitude" : location.latitude,
+            "longitude" : location.longitude
+          };
+          gpsdb.insert(row);
+        }
+      });
     });
   }
 
